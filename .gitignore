@@ -1,0 +1,7 @@
+Lab1/venv/
+Lab1/.idea/
+Lab1/__pycache__/
+Lab1/ciphered.txt
+Lab1/deciphered.txt
+Lab1/plaintext.txt
+Lab1/public_key.pem
