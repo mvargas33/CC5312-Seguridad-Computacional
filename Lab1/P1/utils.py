@@ -26,8 +26,23 @@ def next_prime(n):
     :param n: number where to start searching
     :return: the lowest number greater than n that is prime
     """
+    if(n == 1): # Parche
+        return 2
+    if(n == 2):
+        return 3
     while True:
         n += 1
+        if miller_rabin(n, MILLER_RABIN_ROUNDS):
+            return n
+
+def prev_prime(n):
+    """
+    Returns the previous prime, searching from n
+    :param n: number where to start searching
+    :return: the lowest number greater than n that is prime
+    """
+    while n > 1:
+        n +- 1
         if miller_rabin(n, MILLER_RABIN_ROUNDS):
             return n
 
@@ -42,8 +57,12 @@ def miller_rabin(n, k):
     :param k: number of times to make the check
     :return true if number is probably prime, false otherwise:
     """
-    if n % 2 == 0:
+    if n == 1:
+        return False
+    elif n % 2 == 0:
         return n == 2  # return true only if n is pair and 2, if it is pair and not 2 return false
+    elif n == 3 or n == 5:
+        return True
     d = n - 1
     r = 0
     while d % 2 == 0:
@@ -51,16 +70,18 @@ def miller_rabin(n, k):
         d >>= 1
     # now n = 2^r * d
     for i in range(k):
-        x = 1
-        a = secrets.randbelow(n - 4) + 2  # a \in [2, n-2]
+        a = secrets.randbelow(n - 5) + 2  # a \in [2, n-2]
         x = pow(a, d, n)
         if x == 1 or x == n - 1:
             continue
-        for j in range(r - 1):
-            x = (x << 1) % n
+        for j in range(r-1):
+            x = pow(x, 2, n)
+            if x == 1:
+                return False
             if x == n - 1:
-                continue
-        return False
+                break
+        else:
+            return False
     return True
 
 
@@ -123,7 +144,7 @@ def new_rsa_key(bitsize):
     # First we get a prime of size bitsize / 2
     p = random_prime(bitsize // 2)
     # Then we use a smart hack I invented to speed up the process!
-    q = next_prime(p)
+    q = next_prime(p) # SEGUNDO PRIMO DEPENDE DEL PRIMERO! VULNERABLE
     return new_fixed_rsa_key(p, q)
 
 
