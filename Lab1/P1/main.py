@@ -10,7 +10,7 @@ if __name__ == "__main__":
     print("Creating a random document...")
     # creating a new 2048 bit rsa key
     print("Creating a new 2048 bit RSA key...")
-    sk = utils.new_rsa_key(860)
+    sk = utils.new_rsa_key(2048)
     pk = sk.public_key()
     print("the key has N = {} and e = {}".format(utils.get_n(pk), utils.get_e(pk)))
     print("Creating a random latin-like sentence...")
