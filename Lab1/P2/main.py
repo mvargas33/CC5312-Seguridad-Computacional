@@ -9,6 +9,10 @@ sock_A = utils.create_socket(ADDRESS_A)
 sock_B = utils.create_socket(ADDRESS_B)
 
 def senAResendB(message):
+    """
+    Enía message a A, y respues de A la envía a B.
+    Retorna Respuesta de B.
+    """
     resp_A = utils.send_message(sock_A, message)
     resp_B = utils.send_message(sock_B, resp_A)
     return resp_B
