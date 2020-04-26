@@ -42,7 +42,7 @@ def prev_prime(n):
     :return: the lowest number greater than n that is prime
     """
     while n > 1:
-        n +- 1
+        n -= 1
         if miller_rabin(n, MILLER_RABIN_ROUNDS):
             return n
 
