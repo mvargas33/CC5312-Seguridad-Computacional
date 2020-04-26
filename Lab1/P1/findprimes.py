@@ -6,12 +6,15 @@ from cryptography.hazmat.primitives.serialization.base import Encoding, PublicFo
 import time
 import math
 from decimal import Decimal
+from get_p_q_rsa import *
 
 
 if __name__ == '__main__':
     start = time.time()
-    N = 16324242263806929338883691464847939386268272559910745234713482522596883346252671436566260758046042481669745073201307352699391152423741076884860766505705736127747258311463192230866785690542989565215810046683451920587467082692796607938964583205775437240501995117687660359719031987312915277897474397675560756932974705602707659872100871276143977129847971884850971993846558594756000453492744218560883863033384617929627947035740659946069206228443476870736350393045951697130372215782247120135281155412070673811997741431516441261686409896076876776010943787753695553484733709186657296369141671091670961809161833228347698563161
+    p_key = load_public_key_file(constants.PUBLIC_KEY_PATH)
+    N = get_n(p_key)
     sqrt_N = int(Decimal(N).sqrt().to_integral_exact())
+    """
     # print(sqrt_N*sqrt_N/N)
     # tolerancia = 2**512 # Peor caso
     print(sqrt_N)
@@ -32,16 +35,15 @@ if __name__ == '__main__':
         q = N/p # next_prime(p)
         if(p*q == N):
             break
-        sqrt_N -= 1
-        #     B = mid
-        # # print("p: " + str(p) + " q:  " + str(q) + " p*q: " + str(p*q) + " N: " + str(7043*7079))
-        # if(p*q == N):
-        #     break
-        # elif(p*q > N):
-        #     B = mid
-        # else:
-        #     A = mid + 1
-        print("p: " + str(p) + " q:  " + str(q))
+        elif(p*q > N):
+            B = mid
+        else:
+            A = mid + 1
+    """
+
+    p,q = get_p_q(N)
+    
+    print("p: " + str(p) + " q:  " + str(q))
 
     if( p*q == N):
         print("p % q FOUND!")
