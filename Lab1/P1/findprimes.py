@@ -1,5 +1,4 @@
 from utils import *
-from Cryptodome.PublicKey import RSA
 import constants
 from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.primitives.asymmetric import padding
@@ -12,10 +11,8 @@ from get_p_q_rsa import *
 
 if __name__ == '__main__':
     start = time.time()
-    f = open(constants.PUBLIC_KEY_PATH, "r")
-    key = RSA.importKey(f.read())
-    f.close()
-    N = key.n
+    p_key = load_public_key_file(constants.PUBLIC_KEY_PATH)
+    N = get_n(p_key)
     sqrt_N = int(Decimal(N).sqrt().to_integral_exact())
     """
     # print(sqrt_N*sqrt_N/N)
