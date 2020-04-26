@@ -35,5 +35,6 @@ if __name__ == "__main__":
         except Exception as e:
             print(e)
             print("Closing...")
-            sock.close()
+            sock_A.close()
+            sock_B.close()
             break
