@@ -47,3 +47,21 @@ def send_message(sock, message):
     fd = sock.makefile(errors="ignore")
     resp = fd.readline().strip()
     return resp
+
+
+def hex_to_bytes(hexmsg):
+    """
+    Transforms a hex string to a bytearray.
+    :param hexmsg: a hex string
+    :return: a bytearray
+    """
+    return bytearray.fromhex(hexmsg)
+
+
+def bytes_to_hex(bytearr):
+    """
+    Transforms a bytearray to a hex string.
+    :param bytearr: a bytarray
+    :return: a hex string
+    """
+    return bytearr.hex()

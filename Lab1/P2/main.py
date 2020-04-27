@@ -60,13 +60,71 @@ def calcBlockSize():
     print(mas_repetido)
     return mas_repetido
 
+# TODO : XOR's ZONE
+# Receives ciphered text and block_size
+def decode_last_char(c_text, block_size):
+    # Get cyphered text as an bytearray
+    blocks_array = utils.split_blocks(c_text, block_size)
+    # Get last block or C_{n}
+    c_n = blocks_array[len(blocks_array)-1]
+    # Get block C_{n-1}
+    c_n1 = blocks_array[len(blocks_array)-2]
+    # TODO : Error mssg, can be captured, not just hardcoded by a
+    # function called experiments of something like that
+    error_mssg = "pkcs7: invalid padding (last byte is larger than total length)"
+    # C_{n-1}[BlockSize-1] = 0
+    c_n1[len(c_n1)-1] = 0
+    # Declare M_{n-1}
+    m_n1 = c_n1
+    blocks_array[len(blocks_array)-2] = m_n1
+    # Joinblocks and then cast to hex
+    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+    i = 1
+    # Do-While
+    while True:
+        # Send to sock_B
+        resp = utils.send_message(sock_B, modified_c_text)
+        # Check if there is not a padding error
+        if resp != error_mssg:
+            break
+        # Increase M_{n-1}[BlockSize-1] in one
+        m_n1[len(c_n1)-1] = i
+        # Create a new M_{n-1}
+        blocks_array[len(blocks_array)-2] = m_n1
+        # Joinblocks and then cast to hex
+        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+        i+=1
+    print("Pasa While")
+    # Asegurar que texto plano termina en 0x01
+    # Almacenar valor anterior, por si no se asegura
+    ant = m_n1[len(c_n1)-2]
+    # Cambiar a otro valor
+    m_n1[len(c_n1)-1] = 42
+    blocks_array[len(blocks_array)-2] = m_n1
+    # Joinblocks and then cast to hex
+    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+    # Ask if it still works
+    resp = utils.send_message(sock_B, modified_c_text)
+    # There is an error message, go back
+    if resp == error_mssg:
+        print("No termina en 0x01")
+        m_n1[len(c_n1)-1] = ant
+        blocks_array[len(blocks_array)-2] = m_n1
+        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+    # Else there is not, continue with the same M_{n-1}
+    print("This code has done something until this point")
+    # TODO : XOR_1
+    # TODO : XOR_2
+
 if __name__ == "__main__":
     # sock = utils.create_socket(CONNECTION_ADDR)
+    # Call block_size here because of strange issue that happened
+    block_size = calcBlockSize()
     while True:
         try:
-            calcBlockSize()
             # Read a message from standard input
             response = input("send a message: ")
+            # The next line is a good hint
             # You need to use encode() method to send a string as bytes.
             print("[Client] \"{}\"".format(response))
             # resp = utils.send_message(sock, response)
