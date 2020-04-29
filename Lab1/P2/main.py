@@ -3,6 +3,7 @@ import socket
 # We connect to a (host,port) tuple
 import utils
 import time
+import binascii
 
 ADDRESS_A = ("cc5312.xor.cl", 5312)
 ADDRESS_B = ("cc5312.xor.cl", 5313)
@@ -64,62 +65,71 @@ def calcBlockSize():
     print(i)
     return mas_repetido
 
-# TODO : XOR's ZONE
-# Receives ciphered text and block_size
-def decode_last_char(c_text, block_size):
-    # Get cyphered text as an bytearray
-    blocks_array = utils.split_blocks(c_text, block_size)
-    # Get last block or C_{n}
-    c_n = blocks_array[len(blocks_array)-1]
-    # Get block C_{n-1}
-    c_n1 = blocks_array[len(blocks_array)-2]
-    # TODO : Error mssg, can be captured, not just hardcoded by a
-    # function called experiments of something like that
-    error_mssg = "pkcs7: invalid padding (last byte is larger than total length)"
-    
-    
-    # Declare M_{n-1}
-    m_n1 = c_n1
-    # M_{n-1}[BlockSize-1] = 0
-    m_n1[len(c_n1)-1] = 0
 
-    blocks_array[len(blocks_array)-2] = m_n1
-    # Joinblocks and then cast to hex
-    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
-    i = 1
-    # Do-While
+def decode_last_char(c_text, block_size):
+    """
+    Toma un texto cifrado, y tamaño de bloque
+    Retorna el último byte del mensaje original del texto cifrado
+    :param c_text: byte-like message
+    """
+    error_mssg = "pkcs7: invalid padding (last byte is larger than total length)" # TODO: Find a way to capture error message for invalid padding
+    blocks_array = utils.split_blocks(c_text, block_size)   # Get cyphered text as an bytearray
+    n = len(blocks_array)                                   # Cantidad n de bloques
+    b = block_size//8                                       # Cantidad b de bytes por bloque
+
+                                                            # Obtener C[n]
+    c_n = bytearray(b)                                      # Crea bytearray de largo 128//8 = 16 bytes
+    for i in range(0, b - 1):                               # Copia del byte 0 al 15
+        c_n[i] = blocks_array[n-1][i]                       # El último bloque
+    print("C[n] =   " + str(binascii.hexlify(c_n)))
+                                                            # Obtener C[n-1]
+    c_n1 = bytearray(b)                                     # Crea bytearray de largo 128//8 = 16 bytes
+    for i in range(0, b - 1):                               # Copia del byte 0 al 15
+        c_n1[i] = blocks_array[n-2][i]                      # El penúltimo bloque
+    print("C[n-1] = " + str(binascii.hexlify(c_n1)))
+                                                            # Obtener M[n-1] copiando de C[n-1]
+    m_n1 = bytearray(b)                                     # Crea bytearray de largo 128//8 = 16 bytes
+    for i in range(0, b - 1):                               # Copia del byte 0 al 15
+        m_n1[i] = c_n1[i]                                   # C[n-1]
+    print("M[n-1] = " + str(binascii.hexlify(m_n1)))
+
+    i = 0                                                   # De 0 a 256
     while True:
-        # Send to sock_B
-        resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text)
-        # Check if there is not a padding error
-        if resp != error_mssg:
+        m_n1[b-1] = i                                       # M[n-1][BlockSize-1] = i
+        blocks_array[n-2] = m_n1                            # Sobrescribimos el blocks_Array[n-2] por el M[n-1]
+        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
+        print(c_text.hex())
+        print("\n")
+        print(modified_c_text)
+        #print("M[n-1] = " + str(binascii.hexlify(blocks_array[n-2])))
+
+        resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Send to sock_B
+        if resp != error_mssg:                              # Check if there is not a padding error
             break
-        # Increase M_{n-1}[BlockSize-1] in one
-        m_n1[len(c_n1)-1] = i
-        # Create a new M_{n-1}
-        blocks_array[len(blocks_array)-2] = m_n1
-        # Joinblocks and then cast to hex
-        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
-        i+=1
+        i+=1                                                # Try next i
+        if(i == 255):
+            print("Se han probado los 256 valores de padding sin éxito")
+            exit(1)
+
     print("Pasa While")
     # Asegurar que texto plano termina en 0x01
     # Almacenar valor anterior, por si no se asegura
-    ant = m_n1[len(c_n1)-2]
-    # Cambiar a otro valor
-    m_n1[len(c_n1)-1] = 42
-    blocks_array[len(blocks_array)-2] = m_n1
-    # Joinblocks and then cast to hex
-    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
-    # Ask if it still works
-    resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text)
-    # There is an error message, go back
-    if resp == error_mssg:
-        print("No termina en 0x01")
-        m_n1[len(c_n1)-1] = ant
-        blocks_array[len(blocks_array)-2] = m_n1
-        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
-    # Else there is not, continue with the same M_{n-1}
-    print("This code has done something until this point")
+    # ant = m_n1[len(c_n1)-2]
+    # # Cambiar a otro valor
+    # m_n1[len(c_n1)-1] = 42
+    # blocks_array[n-2] = m_n1
+    # # Joinblocks and then cast to hex
+    # modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+    # # Ask if it still works
+    # resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text)
+    # # There is an error message, go back
+    # if resp == error_mssg:
+    #     print("No termina en 0x01")
+    #     m_n1[len(c_n1)-1] = ant
+    #     blocks_array[n-2] = m_n1
+    #     modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+    # # Else there is not, continue with the same M_{n-1}
+    # print("This code has done something until this point")
     
     # XOR_1
     # Get M_{n-1}[BlockSize-1]
@@ -133,7 +143,7 @@ def decode_last_char(c_text, block_size):
     # XOR_2
     # Get clean c_{n-1}
     blocks_array = utils.split_blocks(c_text, block_size)
-    c_n1 = blocks_array[len(blocks_array)-2]
+    c_n1 = blocks_array[n-2]
     # Get last byte of c_n1
     value_1 = c_n1[len(c_n1)-1]
     # Recover I_{n}[Blocksize-1]
@@ -146,7 +156,7 @@ def decode_last_char(c_text, block_size):
 if __name__ == "__main__":
     # sock = utils.create_socket(CONNECTION_ADDR)
     # Call block_size here because of strange issue that happened
-    block_size = calcBlockSize()
+    # block_size = calcBlockSize()
     block_size = 16*8
     while True:
         try:
