@@ -134,6 +134,8 @@ if __name__ == "__main__":
         except Exception as e:
             print(e)
             print("Closing...")
-            sock_A.close()
-            sock_B.close()
+            sock_A_input.close()
+            sock_A_output.close()
+            sock_B_input.close()
+            sock_B_output.close()
             break
