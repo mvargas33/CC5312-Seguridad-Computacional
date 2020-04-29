@@ -36,13 +36,16 @@ def calcBlockSize():
     actual = 1
     msg = "a"
     chr_aumentados_para_cambio = []
+    i = 0
     rB, largoA = senAResendB(msg)
+    i = 1
     largo_anterior = largoA
     msg = "aa"
     counter = 0
     while(actual < N):
         #time.sleep(0.01) # No sobrecargar al servidor
         rB, largoA = senAResendB(msg)
+        i+=1
         if(rB == msg): # Correctitud
             if(largoA > largo_anterior):
                 chr_aumentados_para_cambio.append(counter + 1)
@@ -58,6 +61,7 @@ def calcBlockSize():
             break
     mas_repetido = max(set(chr_aumentados_para_cambio), key = chr_aumentados_para_cambio.count) # rescata el que tiene más frecuencia
     print(mas_repetido)
+    print(i)
     return mas_repetido
 
 # TODO : XOR's ZONE
@@ -83,7 +87,7 @@ def decode_last_char(c_text, block_size):
     # Do-While
     while True:
         # Send to sock_B
-        resp = utils.send_message(sock_B, modified_c_text)
+        resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text)
         # Check if there is not a padding error
         if resp != error_mssg:
             break
@@ -104,7 +108,7 @@ def decode_last_char(c_text, block_size):
     # Joinblocks and then cast to hex
     modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
     # Ask if it still works
-    resp = utils.send_message(sock_B, modified_c_text)
+    resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text)
     # There is an error message, go back
     if resp == error_mssg:
         print("No termina en 0x01")
@@ -113,13 +117,34 @@ def decode_last_char(c_text, block_size):
         modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
     # Else there is not, continue with the same M_{n-1}
     print("This code has done something until this point")
-    # TODO : XOR_1
-    # TODO : XOR_2
+    
+    # XOR_1
+    # Get M_{n-1}[BlockSize-1]
+    value_1 = m_n1[len(m_n1)-1]
+    #value_1 = i
+    # Get 0x01
+    value_2 = 1
+    # Do XOR and get I_{n}[Blocksize-1]
+    i_n = value_1^value_2
+
+    # XOR_2
+    # Get clean c_{n-1}
+    blocks_array = utils.split_blocks(c_text, block_size)
+    c_n1 = blocks_array[len(blocks_array)-2]
+    # Get last byte of c_n1
+    value_1 = c_n1[len(c_n1)-1]
+    # Recover I_{n}[Blocksize-1]
+    value_2 = i_n
+    # Do XOR and get B_{n}[BlockSize-1]
+    result = value_1^value_2
+    print(result)
+    return result
 
 if __name__ == "__main__":
     # sock = utils.create_socket(CONNECTION_ADDR)
     # Call block_size here because of strange issue that happened
     block_size = calcBlockSize()
+    block_size = 16*8
     while True:
         try:
             # Read a message from standard input
@@ -128,7 +153,8 @@ if __name__ == "__main__":
             # You need to use encode() method to send a string as bytes.
             print("[Client] \"{}\"".format(response))
             # resp = utils.send_message(sock, response)
-            resp = senAResendB(response)
+            resp = utils.send_message(sock_A_input, sock_A_output, response)
+            b = decode_last_char(resp.encode(), block_size)
             print("[Server] \"{}\"".format(resp))
             # Wait for a response and disconnect.
         except Exception as e:
