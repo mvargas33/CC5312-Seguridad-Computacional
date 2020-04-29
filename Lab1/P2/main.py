@@ -6,16 +6,16 @@ import time
 
 ADDRESS_A = ("cc5312.xor.cl", 5312)
 ADDRESS_B = ("cc5312.xor.cl", 5313)
-sock_A = utils.create_socket(ADDRESS_A)
-sock_B = utils.create_socket(ADDRESS_B)
+sock_A_input, sock_A_output= utils.create_socket(ADDRESS_A)
+sock_B_input, sock_B_output = utils.create_socket(ADDRESS_B)
 
 def senAResendB(message):
     """
     Enía message a A, y respues de A la envía a B.
     Retorna Respuesta de B.
     """
-    resp_A = utils.send_message(sock_A, message)
-    resp_B = utils.send_message(sock_B, resp_A)
+    resp_A = utils.send_message(sock_A_input, sock_A_output, message)
+    resp_B = utils.send_message(sock_B_input, sock_B_output, resp_A)
     # if not (resp_B == message):
     #     print(resp_B)
     return resp_B, len(resp_A)
