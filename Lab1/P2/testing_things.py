@@ -1,4 +1,5 @@
 import socket
+from pprint import pprint
 
 # We connect to a (host,port) tuple
 import utils
@@ -6,16 +7,16 @@ import time
 
 ADDRESS_A = ("cc5312.xor.cl", 5312)
 ADDRESS_B = ("cc5312.xor.cl", 5313)
-sock_A_input, sock_A_output= utils.create_socket(ADDRESS_A)
-sock_B_input, sock_B_output = utils.create_socket(ADDRESS_B)
+sock_A = utils.create_socket(ADDRESS_A)
+sock_B = utils.create_socket(ADDRESS_B)
 
 def senAResendB(message):
     """
     Enía message a A, y respues de A la envía a B.
     Retorna Respuesta de B.
     """
-    resp_A = utils.send_message(sock_A_input, sock_A_output, message)
-    resp_B = utils.send_message(sock_B_input, sock_B_output, resp_A)
+    resp_A = utils.send_message(sock_A, message)
+    resp_B = utils.send_message(sock_B, resp_A)
     # if not (resp_B == message):
     #     print(resp_B)
     return resp_B, len(resp_A)
@@ -63,8 +64,11 @@ def calcBlockSize():
 # TODO : XOR's ZONE
 # Receives ciphered text and block_size
 def decode_last_char(c_text, block_size):
+    d = {}
     # Get cyphered text as an bytearray
     blocks_array = utils.split_blocks(c_text, block_size)
+    # Define block_size
+    block_size_arr = len(blocks_array)
     # Get last block or C_{n}
     c_n = blocks_array[len(blocks_array)-1]
     # Get block C_{n-1}
@@ -84,9 +88,11 @@ def decode_last_char(c_text, block_size):
     while True:
         # Send to sock_B
         resp = utils.send_message(sock_B, modified_c_text)
+        # Dictionary
+        d[i] = resp
         # Check if there is not a padding error
-        if resp != error_mssg:
-            break
+        #if not resp.startswith('pkcs7'):
+        #    break
         # Increase M_{n-1}[BlockSize-1] in one
         m_n1[len(c_n1)-1] = i
         # Create a new M_{n-1}
@@ -94,27 +100,52 @@ def decode_last_char(c_text, block_size):
         # Joinblocks and then cast to hex
         modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
         i+=1
+        if i>255:
+            break
+    # Print dictionary
+    pprint(d)
     print("Pasa While")
+    print(i)
     # Asegurar que texto plano termina en 0x01
     # Almacenar valor anterior, por si no se asegura
     ant = m_n1[len(c_n1)-2]
     # Cambiar a otro valor
-    m_n1[len(c_n1)-1] = 42
+    m_n1[len(c_n1)-1] += 1
     blocks_array[len(blocks_array)-2] = m_n1
     # Joinblocks and then cast to hex
     modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
     # Ask if it still works
     resp = utils.send_message(sock_B, modified_c_text)
     # There is an error message, go back
-    if resp == error_mssg:
+    if resp.startswith('pkcs7'):
         print("No termina en 0x01")
-        m_n1[len(c_n1)-1] = ant
-        blocks_array[len(blocks_array)-2] = m_n1
-        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+    m_n1[len(c_n1)-1] = ant
+    blocks_array[len(blocks_array)-2] = m_n1
+    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
     # Else there is not, continue with the same M_{n-1}
     print("This code has done something until this point")
-    # TODO : XOR_1
-    # TODO : XOR_2
+    # XOR_1
+    # Get M_{n-1}[BlockSize-1]
+    value_1 = m_n1[len(m_n1)-1]
+    #value_1 = i
+    # Get 0x01
+    value_2 = 1
+    # Do XOR and get I_{n}[Blocksize-1]
+    i_n = value_1^value_2
+
+    # XOR_2
+    # Get clean c_{n-1}
+    blocks_array = utils.split_blocks(c_text, block_size)
+    c_n1 = blocks_array[len(blocks_array)-2]
+    # Get last byte of c_n1
+    value_1 = c_n1[len(c_n1)-1]
+    # Recover I_{n}[Blocksize-1]
+    value_2 = i_n
+    # Do XOR and get B_{n}[BlockSize-1]
+    result = value_1^value_2
+    print(result)
+    return result
+
 
 if __name__ == "__main__":
     # sock = utils.create_socket(CONNECTION_ADDR)
@@ -127,9 +158,12 @@ if __name__ == "__main__":
             # The next line is a good hint
             # You need to use encode() method to send a string as bytes.
             print("[Client] \"{}\"".format(response))
+            print(utils.bytes_to_hex(response.encode()))
             # resp = utils.send_message(sock, response)
-            resp = senAResendB(response)
-            print("[Server] \"{}\"".format(resp))
+            resp_A = utils.send_message(sock_A, response)
+            resp_B = utils.send_message(sock_B, resp_A)
+            print("[Server] \"{}\"".format(resp_A))
+            decode_last_char(resp_A.encode(), block_size)
             # Wait for a response and disconnect.
         except Exception as e:
             print(e)
