@@ -76,10 +76,13 @@ def decode_last_char(c_text, block_size):
     # TODO : Error mssg, can be captured, not just hardcoded by a
     # function called experiments of something like that
     error_mssg = "pkcs7: invalid padding (last byte is larger than total length)"
-    # C_{n-1}[BlockSize-1] = 0
-    c_n1[len(c_n1)-1] = 0
+    
+    
     # Declare M_{n-1}
     m_n1 = c_n1
+    # M_{n-1}[BlockSize-1] = 0
+    m_n1[len(c_n1)-1] = 0
+
     blocks_array[len(blocks_array)-2] = m_n1
     # Joinblocks and then cast to hex
     modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
