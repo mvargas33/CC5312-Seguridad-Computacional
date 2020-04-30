@@ -97,7 +97,7 @@ def decode_last_char(c_text, block_size):
     for i in range(0, b - 1):                               # Copia del byte 0 al 15
         m_n1[i] = c_n1[i]                                   # C[n-1]
     print("M[n-1] = " + str(binascii.hexlify(m_n1)))
-    
+
     # print("")
     # print(utils.bytes_to_hex(utils.join_blocks(blocks_array)))
     # print("before while")
@@ -128,7 +128,7 @@ def decode_last_char(c_text, block_size):
         if resp != error_mssg:                              # Check if there is not a padding error
             break
         i+=1                                                # Try next i
-        if(i == 255):
+        if(i == 256):
             print("Se han probado los 256 valores de padding sin éxito")
             exit(1)
     
