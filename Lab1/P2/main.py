@@ -103,12 +103,22 @@ def decode_last_char(c_text, block_size):
     while True:
         m_n1[b-1] = i                                       # M[n-1][BlockSize-1] = i
         #blocks_array[n-2] = m_n1                            # Sobrescribimos el blocks_Array[n-2] por el M[n-1]
+        msg = bytearray()
+        for j in range(0, n-3):
+            for i in range(0, b - 1):                               # Copia del byte 0 al 15
+                msg += blocks_array[j][i].to_bytes(1, 'big')                     # El penúltimo bloque
+
+
         for i in range(0, b - 1):                               # Copia del byte 0 al 15
-            blocks_array[n-2][i] = m_n1[i]                      # El penúltimo bloque
-        print(utils.bytes_to_hex(utils.join_blocks(blocks_array)) == c_text.hex()) # Revisemos si efectivamente cambia el blocks_Array  o no. Spoiler: no cambia
-        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
+            msg += m_n1[i].to_bytes(1, 'big')                       # El penúltimo bloque
+        for i in range(0, b - 1):                               # Copia del byte 0 al 15
+            msg += blocks_array[n-1][i].to_bytes(1, 'big')                       # El penúltimo bloque
+
+        modified_c_text = utils.bytes_to_hex(msg)
+        #print(utils.bytes_to_hex(utils.join_blocks(blocks_array)) == c_text.hex()) # Revisemos si efectivamente cambia el blocks_Array  o no. Spoiler: no cambia
+        #modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
         # print("\n")
-        # print(modified_c_text)
+        print(modified_c_text)
         #print("M[n-1] = " + str(binascii.hexlify(blocks_array[n-2])))
 
         resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Send to sock_B
