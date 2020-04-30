@@ -74,9 +74,9 @@ def decode_last_char(c_text, block_size):
     """
     error_mssg = "pkcs7: invalid padding (last byte is larger than total length)" # TODO: Find a way to capture error message for invalid padding
     blocks_array = utils.split_blocks(c_text, block_size)   # Get cyphered text as an bytearray
-    print(c_text.hex())
-    print("")
-    print(utils.bytes_to_hex(utils.join_blocks(blocks_array)))
+    # print(c_text.hex())
+    # print("")
+    # print(utils.bytes_to_hex(utils.join_blocks(blocks_array)))
 
     n = len(blocks_array)                                   # Cantidad n de bloques
     b = block_size//8                                       # Cantidad b de bytes por bloque
@@ -87,6 +87,7 @@ def decode_last_char(c_text, block_size):
         c_n[i] = blocks_array[n-1][i]                       # El último bloque
     print("C[n] =   " + str(binascii.hexlify(c_n)))
                                                             # Obtener C[n-1]
+
     c_n1 = bytearray(b)                                     # Crea bytearray de largo 128//8 = 16 bytes
     for i in range(0, b - 1):                               # Copia del byte 0 al 15
         c_n1[i] = blocks_array[n-2][i]                      # El penúltimo bloque
@@ -95,30 +96,32 @@ def decode_last_char(c_text, block_size):
     m_n1 = bytearray(b)                                     # Crea bytearray de largo 128//8 = 16 bytes
     for i in range(0, b - 1):                               # Copia del byte 0 al 15
         m_n1[i] = c_n1[i]                                   # C[n-1]
-    print("M[n-1] = " + str(binascii.hexlify(m_n1)))
-    print("")
-    print(utils.bytes_to_hex(utils.join_blocks(blocks_array)))
-    print("after while")
+
+    # print("M[n-1] = " + str(binascii.hexlify(m_n1)))
+    # print("")
+    # print(utils.bytes_to_hex(utils.join_blocks(blocks_array)))
+    # print("before while")
     i = 0                                                   # De 0 a 256
     while True:
         m_n1[b-1] = i                                       # M[n-1][BlockSize-1] = i
-        #blocks_array[n-2] = m_n1                            # Sobrescribimos el blocks_Array[n-2] por el M[n-1]
-        msg = bytearray()
-        for j in range(0, n-3):
-            for i in range(0, b - 1):                               # Copia del byte 0 al 15
-                msg += blocks_array[j][i].to_bytes(1, 'big')                     # El penúltimo bloque
+        # INTENTO 0
+        blocks_array[n-2] = m_n1                            # Sobrescribimos el blocks_Array[n-2] por el M[n-1]
+        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
+        
+        # INTENTO 1
+        # msg = bytearray()
+        # for j in range(0, n-3):
+        #     for i in range(0, b - 1):                               # Copia del byte 0 al 15
+        #         msg += blocks_array[j][i].to_bytes(1, 'big')        # El penúltimo bloque
+        # for i in range(0, b - 1):                                   # Copia del byte 0 al 15
+        #     msg += m_n1[i].to_bytes(1, 'big')                       # El PNEnúltimo bloque
+        # for i in range(0, b - 1):                                   # Copia del byte 0 al 15
+        #     msg += blocks_array[n-1][i].to_bytes(1, 'big')          # El núltimo bloque
+
+        # modified_c_text = utils.bytes_to_hex(msg)
 
 
-        for i in range(0, b - 1):                               # Copia del byte 0 al 15
-            msg += m_n1[i].to_bytes(1, 'big')                       # El penúltimo bloque
-        for i in range(0, b - 1):                               # Copia del byte 0 al 15
-            msg += blocks_array[n-1][i].to_bytes(1, 'big')                       # El penúltimo bloque
-
-        modified_c_text = utils.bytes_to_hex(msg)
-        #print(utils.bytes_to_hex(utils.join_blocks(blocks_array)) == c_text.hex()) # Revisemos si efectivamente cambia el blocks_Array  o no. Spoiler: no cambia
-        #modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
-        # print("\n")
-        print(modified_c_text)
+        print("Largo original/modificado/Son Diferentes?: " + str(len(c_text.hex())) + "/" +  str(len(modified_c_text)) + "/" + str(modified_c_text == c_text.hex()))
         #print("M[n-1] = " + str(binascii.hexlify(blocks_array[n-2])))
 
         resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Send to sock_B
