@@ -157,6 +157,7 @@ def decode_last_char(c_text, block_size):
     # XOR_1
     # Get M_{n-1}[BlockSize-1]
     value_1 = m_n1[len(m_n1)-1]
+    print(value_1)
     #value_1 = i
     # Get 0x01
     value_2 = 1
@@ -165,7 +166,7 @@ def decode_last_char(c_text, block_size):
 
     # XOR_2
     # Get clean c_{n-1}
-    blocks_array = utils.split_blocks(c_text, block_size)
+    blocks_array = utils.split_blocks(c_text, block_size//8)
     c_n1 = blocks_array[n-2]
     # Get last byte of c_n1
     value_1 = c_n1[len(c_n1)-1]
