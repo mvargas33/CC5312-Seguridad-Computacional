@@ -96,8 +96,8 @@ def decode_last_char(c_text, block_size):
     m_n1 = bytearray(b)                                     # Crea bytearray de largo 128//8 = 16 bytes
     for i in range(0, b - 1):                               # Copia del byte 0 al 15
         m_n1[i] = c_n1[i]                                   # C[n-1]
-
-    # print("M[n-1] = " + str(binascii.hexlify(m_n1)))
+    print("M[n-1] = " + str(binascii.hexlify(m_n1)))
+    
     # print("")
     # print(utils.bytes_to_hex(utils.join_blocks(blocks_array)))
     # print("before while")
