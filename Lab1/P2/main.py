@@ -72,8 +72,8 @@ def decode_last_char(c_text, block_size):
     Retorna el último byte del mensaje original del texto cifrado
     :param c_text: byte-like message
     """
-    error_mssg = "pkcs7: invalid padding (last byte is larger than total length)" # TODO: Find a way to capture error message for invalid padding
-    blocks_array = utils.split_blocks(c_text, block_size)   # Get cyphered text as an bytearray
+    error_mssg = "pkcs7: invalid padding (last byte does not match padding)" # TODO: Find a way to capture error message for invalid padding
+    blocks_array = utils.split_blocks(c_text, block_size//8)   # Get cyphered text as an bytearray
     # print(c_text.hex())
     # print("")
     # print(utils.bytes_to_hex(utils.join_blocks(blocks_array)))
@@ -125,6 +125,7 @@ def decode_last_char(c_text, block_size):
         #print("M[n-1] = " + str(binascii.hexlify(blocks_array[n-2])))
 
         resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Send to sock_B
+        print(resp)
         if resp != error_mssg:                              # Check if there is not a padding error
             break
         i+=1                                                # Try next i
