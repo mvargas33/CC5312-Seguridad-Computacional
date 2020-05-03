@@ -73,7 +73,7 @@ def decode_last_char(c_text, block_size):
     :param c_text: byte-like message
     """
     error_mssg = "pkcs7: invalid padding (last byte does not match padding)" # TODO: Find a way to capture error message for invalid padding
-    blocks_array = utils.split_blocks(c_text, block_size//8)   # Get cyphered text as an bytearray
+    blocks_array = utils.split_blocks(c_text, block_size//8)# Get cyphered text as an bytearray
     n = len(blocks_array)                                   # Cantidad n de bloques
     b = block_size//8                                       # Cantidad b de bytes por bloque
 
@@ -92,33 +92,45 @@ def decode_last_char(c_text, block_size):
         blocks_array[n-2] = m_n1                            # Sobrescribimos el blocks_Array[n-2] por el M[n-1]
         modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
         resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Send to sock_B
-        if resp != error_mssg:                              # Check if there is not a padding error
-            break
+        if resp != error_mssg:                              # Check if there is not a padding error, we have a candidate
+            # Validar: Asegurar que texto plano termina en 0x01
+            ant = m_n1[b-2]             # M[n-1][b-2] penúltimo valor antiguo
+            m_n1[b-2] = ant+1 % 256     # Cambiar a otro valor
+            blocks_array[n-2] = m_n1    # Modificamos M[n-2]
+            modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))   # Joinblocks and then cast to hex
+            resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Ask if it still works
+
+            if resp == error_mssg:      # No validó There is an error message, go back
+                print("No valida, valor encontrado para M[n-1][b-1] incosistente, buscando otro valor ...")
+                m_n1[b-2] = ant             # Always Revert
+                blocks_array[n-2] = m_n1
+                modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+            else:
+                m_n1[b-2] = ant             # Always Revert
+                blocks_array[n-2] = m_n1
+                modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+                break # Pasó validación, encontramos M[n-1][b-1]
         i+=1                                                # Try next i
         if(i == 256):
             print("Se han probado los 256 valores de padding sin éxito")
             exit(1)
     
-    # Asegurar que texto plano termina en 0x01
-
-    ant = m_n1[b-2]             # M[n-1][b-2] penúltimo valor antiguo
-    m_n1[b-2] = ant+1 % 256     # Cambiar a otro valor
-
-    blocks_array[n-2] = m_n1    # Modificamos M[n-2]
-    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))   # Joinblocks and then cast to hex
-    resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Ask if it still works
-
-    if resp == error_mssg:      # There is an error message, go back
-        print("No valida, valor encontrado para C[n-1][b-1] incosistente")
-        exit(1)
-
-    m_n1[b-2] = ant             # Always Revert
-    blocks_array[n-2] = m_n1
-    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
-
     i_n = i^1 # XOR para obtener I_[n][b-1]. i = M[n-1][b-1], 1 = 0x01
     c_n1_b1 = utils.split_blocks(c_text, block_size//8)[n-2][b-1] # Get clean C[n-1][b-1]
     return i_n^c_n1_b1 # XOR para obtener B_[n][b-1]
+
+def decode_last_block(c_text, block_size):
+    """
+    Toma un texto cifrado, y tamaño de bloque
+    Retorna el último bloque del mensaje original del texto cifrado
+    :param c_text: byte-like message
+    """
+    error_mssg = "pkcs7: invalid padding (last byte does not match padding)" # TODO: Find a way to capture error message for invalid padding
+    blocks_array = utils.split_blocks(c_text, block_size//8)# Get cyphered text as an bytearray
+    n = len(blocks_array)                                   # Cantidad n de bloques
+    b = block_size//8                                       # Cantidad b de bytes por bloque
+
+
 
 if __name__ == "__main__":
     # sock = utils.create_socket(CONNECTION_ADDR)
@@ -135,6 +147,7 @@ if __name__ == "__main__":
             # resp = utils.send_message(sock, response)
             resp = utils.send_message(sock_A_input, sock_A_output, response)
             b = decode_last_char(resp.encode(), block_size)
+            print(b)
             print("[Server] \"{}\"".format(resp))
             # Wait for a response and disconnect.
         except Exception as e:
