@@ -189,7 +189,7 @@ def decode_last_block2(c_text, block_size, i_n_b1):
 
 def decode_all_blocks2(c_text, block_size):
     blocks_array = utils.split_blocks(c_text, block_size//8)# Get cyphered text as an bytearray
-    n = len(block_size)
+    n = len(blocks_array)
     plain_text = bytearray(n-1)
 
     for i in range(n-1, 0, -1):
@@ -217,7 +217,7 @@ if __name__ == "__main__":
             print("[Client] \"{}\"".format(response))
             # resp = utils.send_message(sock, response)
             resp = utils.send_message(sock_A_input, sock_A_output, response)
-            decode_all_blocks2(resp, block_size)
+            decode_all_blocks2(resp.encode(), block_size)
             #i_n_b1, b = decode_last_char(resp.encode(), block_size)
             #decode_last_block2(resp.encode(), block_size, i_n_b1)
             print("[Server] \"{}\"".format(resp))
