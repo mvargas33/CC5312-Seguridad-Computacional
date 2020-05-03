@@ -111,10 +111,10 @@ def decode_last_char(c_text, block_size):
             exit(1)
     
     i_n = i^1 # XOR para obtener I_[n][b-1]. i = M[n-1][b-1], 1 = 0x01
-    c_n1_b1 = utils.split_blocks(c_text, block_size//8)[n-2][b-1] # Get clean C[n-1][b-1]
-    return i_n^c_n1_b1 # XOR para obtener B_[n][b-1]
+    c_n1_b1 = utils.split_blocks(c_text, block_size//8)[n-2][b-1] # Get clean C[n-2][b-1]
+    return i_n, i_n^c_n1_b1 # XOR para obtener B_[n][b-1]
 
-def decode_last_block(c_text, block_size):
+def decode_last_block2(c_text, block_size, i_n_b1):
     """
     Toma un texto cifrado, y tamaño de bloque
     Retorna el último bloque del mensaje original del texto cifrado
@@ -125,11 +125,65 @@ def decode_last_block(c_text, block_size):
     n = len(blocks_array)                                   # Cantidad n de bloques
     b = block_size//8                                       # Cantidad b de bytes por bloque
 
+    i_n = bytearray(b)                                      # Crea bytearray de largo 128//8 = 16 bytes
+    for i in range(0, b - 2):                               # Copia del byte 0 al 15
+        i_n[i] = 0
+    i_n[b-1] = i_n_b1                                       # Único Valor conocido a la fecha
+
+    queremos = b - 2                                        # Queremos conocer b - 2 al inicio
+    while queremos >= 0:
+        conocemos = queremos + 1                                # Conocemos de b-1 : b-1, 
+        paddingByte = b - queremos                              # Padding byte
+
+        m_n1 = bytearray(b)                                     # Crea bytearray de largo 128//8 = 16 bytes
+        for i in range(b-1, conocemos, -1):                     # [.........[b-2][b-1]]
+            m_n1[i] = i_n[i]^paddingByte                        #  M[n-1] = I[n] XOR PaddingByte
 
 
+        i = 0                                                   # De 0 a 256
+        while True:
+            m_n1[queremos] = i                                  # M[n-1][Queremos] = i
+            blocks_array[n-2] = m_n1                            # Sobrescribimos el blocks_Array[n-2] por el M[n-1]
+            modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
+            resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Send to sock_B
+            if resp != error_mssg:                              # Check if there is not a padding error, we have a candidate
+                if queremos != 0:
+                    # Validar: Asegurar que texto plano termina en 0x01
+                    ant = m_n1[queremos-1]             # M[n-1][queremos-1] penúltimo valor antiguo
+                    m_n1[queremos-1] = ant+1 % 256     # Cambiar a otro valor
+                    blocks_array[n-2] = m_n1    # Modificamos M[n-2]
+                    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))   # Joinblocks and then cast to hex
+                    resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Ask if it still works
 
+                    if resp == error_mssg:      # No validó There is an error message, go back
+                        print("No valida, valor encontrado para M[n-1][queremos] incosistente, buscando otro valor ...")
+                        m_n1[queremos-1] = ant             # Always Revert
+                        blocks_array[n-2] = m_n1
+                        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+                    else:
+                        m_n1[queremos-1] = ant             # Always Revert
+                        blocks_array[n-2] = m_n1
+                        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+                        break # Pasó validación, encontramos M[n-1][queremos]
+                else:
+                    break
+            i+=1                                                # Try next i
+            if(i == 256):
+                print("Se han probado los 256 valores de padding sin éxito")
+                exit(1)
+                
+        i_n[queremos] = i^paddingByte # XOR para obtener I_[n][queremos]. i = M[n-1][queremos], paddingByte = 0x02, 0x03 ...
+        queremos -= 1
 
-
+    # Obtener el último bloque
+    c_n1 = utils.split_blocks(c_text, block_size//8)[n-2]   # Get clean C[n-2][b-1]
+    b_n = bytearray(b)                                      # Crea bytearray de largo 128//8 = 16 bytes
+    for i in range(0, b - 1):                               # Copia del byte 0 al 15
+        b_n[i] = i_n[i]^c_n1[i]
+    print(c_n1)
+    return b_n
+    
+    
 if __name__ == "__main__":
     # sock = utils.create_socket(CONNECTION_ADDR)
     # Call block_size here because of strange issue that happened
@@ -144,8 +198,8 @@ if __name__ == "__main__":
             print("[Client] \"{}\"".format(response))
             # resp = utils.send_message(sock, response)
             resp = utils.send_message(sock_A_input, sock_A_output, response)
-            b = decode_last_char(resp.encode(), block_size)
-            print(b)
+            i_n_b1, b = decode_last_char(resp.encode(), block_size)
+            decode_last_block2(resp.encode(), block_size, i_n_b1)
             print("[Server] \"{}\"".format(resp))
             # Wait for a response and disconnect.
         except Exception as e:
