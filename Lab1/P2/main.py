@@ -77,14 +77,9 @@ def decode_last_char(c_text, block_size):
     n = len(blocks_array)                                   # Cantidad n de bloques
     b = block_size//8                                       # Cantidad b de bytes por bloque
 
-                                                            # Obtener C[n-1]
-    c_n1 = bytearray(b)                                     # Crea bytearray de largo 128//8 = 16 bytes
-    for i in range(0, b - 1):                               # Copia del byte 0 al 15
-        c_n1[i] = blocks_array[n-2][i]                      # El penúltimo bloque
-                                                            # Obtener M[n-1] copiando de C[n-1]
     m_n1 = bytearray(b)                                     # Crea bytearray de largo 128//8 = 16 bytes
     for i in range(0, b - 1):                               # Copia del byte 0 al 15
-        m_n1[i] = c_n1[i]                                   # C[n-1]
+        m_n1[i] = blocks_array[n-2][i]                      # Obtener M[n-1] copiando de C[n-1]
 
     i = 0                                                   # De 0 a 256
     while True:
@@ -129,6 +124,9 @@ def decode_last_block(c_text, block_size):
     blocks_array = utils.split_blocks(c_text, block_size//8)# Get cyphered text as an bytearray
     n = len(blocks_array)                                   # Cantidad n de bloques
     b = block_size//8                                       # Cantidad b de bytes por bloque
+
+
+
 
 
 
