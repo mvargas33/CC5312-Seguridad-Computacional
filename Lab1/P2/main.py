@@ -121,16 +121,16 @@ def decode_last_block2(c_text, block_size, i_n_b1):
     :param c_text: byte-like message
     """
     error_mssg = "pkcs7: invalid padding (last byte does not match padding)" # TODO: Find a way to capture error message for invalid padding
-    blocks_array = utils.split_blocks(c_text, block_size//8)# Get cyphered text as an bytearray
-    n = len(blocks_array)                                   # Cantidad n de bloques
-    b = block_size//8                                       # Cantidad b de bytes por bloque
+    blocks_array = utils.split_blocks(c_text, block_size//8)    # Get cyphered text as an bytearray
+    n = len(blocks_array)                                       # Cantidad n de bloques
+    b = block_size//8                                           # Cantidad b de bytes por bloque
 
-    i_n = bytearray(b)                                      # Crea bytearray de largo 128//8 = 16 bytes
-    for i in range(0, b - 2):                               # Copia del byte 0 al 15
+    i_n = bytearray(b)                                          # Crea bytearray de largo 128//8 = 16 bytes
+    for i in range(0, b - 2):                                   # Copia del byte 0 al 15
         i_n[i] = 0
-    i_n[b-1] = i_n_b1                                       # Único Valor conocido a la fecha
+    i_n[b-1] = i_n_b1                                           # Único Valor conocido a la fecha
 
-    queremos = b - 2                                        # Queremos conocer b - 2 al inicio
+    queremos = b - 2                                            # Queremos conocer b - 2 al inicio
     while queremos >= 0:
         conocemos = queremos + 1                                # Conocemos de b-1 : b-1, 
         paddingByte = b - queremos                              # Padding byte
@@ -147,24 +147,25 @@ def decode_last_block2(c_text, block_size, i_n_b1):
             modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
             resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Send to sock_B
             if resp != error_mssg:                              # Check if there is not a padding error, we have a candidate
-                if queremos != 0:
+                if queremos != 0:                               # Si el es primer byte, no podemos validar
+                    
                     # Validar: Asegurar que texto plano termina en 0x01
-                    ant = m_n1[queremos-1]             # M[n-1][queremos-1] penúltimo valor antiguo
-                    m_n1[queremos-1] = ant+1 % 256     # Cambiar a otro valor
-                    blocks_array[n-2] = m_n1    # Modificamos M[n-2]
+                    ant = m_n1[queremos-1]                      # M[n-1][queremos-1] penúltimo valor antiguo
+                    m_n1[queremos-1] = ant+1 % 256              # Cambiar a otro valor
+                    blocks_array[n-2] = m_n1                    # Modificamos M[n-2]
                     modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))   # Joinblocks and then cast to hex
                     resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Ask if it still works
 
-                    if resp == error_mssg:      # No validó There is an error message, go back
+                    if resp == error_mssg:                      # No validó There is an error message, go back
                         print("No valida, valor encontrado para M[n-1][queremos] incosistente, buscando otro valor ...")
-                        m_n1[queremos-1] = ant             # Always Revert
+                        m_n1[queremos-1] = ant                  # Always Revert
                         blocks_array[n-2] = m_n1
                         modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
                     else:
-                        m_n1[queremos-1] = ant             # Always Revert
+                        m_n1[queremos-1] = ant                  # Always Revert
                         blocks_array[n-2] = m_n1
                         modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
-                        break # Pasó validación, encontramos M[n-1][queremos]
+                        break                                   # Pasó validación, encontramos M[n-1][queremos]
                 else:
                     break
             i+=1                                                # Try next i
@@ -181,9 +182,9 @@ def decode_last_block2(c_text, block_size, i_n_b1):
     for i in range(0, b - 1):                               # Copia del byte 0 al 15
         b_n[i] = i_n[i]^c_n1[i]
     print(c_n1)
-    return b_n
+    return b_n                                              # Return bytearray del texto descifrado
     
-    
+
 if __name__ == "__main__":
     # sock = utils.create_socket(CONNECTION_ADDR)
     # Call block_size here because of strange issue that happened
