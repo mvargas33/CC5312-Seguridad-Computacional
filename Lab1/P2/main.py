@@ -110,6 +110,7 @@ def decode_last_char(c_text, block_size):
 
     if resp == error_mssg:      # There is an error message, go back
         print("No valida, valor encontrado para C[n-1][b-1] incosistente")
+        exit(1)
 
     m_n1[b-2] = ant             # Always Revert
     blocks_array[n-2] = m_n1
