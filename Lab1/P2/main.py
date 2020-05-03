@@ -196,7 +196,7 @@ def decode_all_blocks2(c_text, block_size):
         modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array[0:i]))
 
         i_n_b1, b = decode_last_char(modified_c_text.encode(), block_size)
-        plain_text[i-1] = decode_last_block2(resp.encode(), block_size, i_n_b1)
+        plain_text[i-1] = decode_last_block2(modified_c_text.encode(), block_size, i_n_b1)
 
     print(binascii.unhexlify(utils.bytes_to_hex(utils.join_blocks(blocks_array))))
     return plain_text
