@@ -132,6 +132,7 @@ def decode_last_block2(c_text, block_size, i_n_b1):
 
     queremos = b - 2                                            # Queremos conocer b - 2 al inicio
     while queremos >= 0:
+        print("Vamos en el byte: " + str(queremos))
         conocemos = queremos + 1                                # Conocemos de b-1 : b-1, 
         paddingByte = b - queremos                              # Padding byte
 
@@ -190,7 +191,7 @@ def decode_last_block2(c_text, block_size, i_n_b1):
 def decode_all_blocks2(c_text, block_size):
     """
     Dado un texto cifrado y tamaño de bloque,
-    Retorna el texto plano
+    Retorna el texto plano del texto cifrado
     """
     blocks_array = utils.split_blocks(c_text, block_size//8)# Get cyphered text as an bytearray
     n = len(blocks_array)                                   # Cantidad n de bloques
@@ -200,6 +201,7 @@ def decode_all_blocks2(c_text, block_size):
         print("Vamos en el bloque: " + str(i+1) + "/" + str(n))
         modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array[0:i]))
 
+        print("Vamos en el byte: " + str(block_size//8 - 1))
         i_n_b1, b = decode_last_char(modified_c_text.encode(), block_size)
         plain_text.extend(decode_last_block2(modified_c_text.encode(), block_size, i_n_b1))
 
