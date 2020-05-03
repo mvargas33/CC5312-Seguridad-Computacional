@@ -101,19 +101,19 @@ def decode_last_char(c_text, block_size):
     
     # Asegurar que texto plano termina en 0x01
 
-    # ant = m_n1[b-2]         # M[n-1][b-2] penúltimo valor antiguo
-    # m_n1[b-2] = ant+1 % 256 # Cambiar a otro valor
+    ant = m_n1[b-2]             # M[n-1][b-2] penúltimo valor antiguo
+    m_n1[b-2] = ant+1 % 256     # Cambiar a otro valor
 
-    # blocks_array[n-2] = m_n1    # Modificamos M[n-2]
-    # modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
-    # resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Ask if it still works
+    blocks_array[n-2] = m_n1    # Modificamos M[n-2]
+    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))   # Joinblocks and then cast to hex
+    resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Ask if it still works
 
-    # if resp == error_mssg:      # There is an error message, go back
-    #     print("No termina en 0x01")
-    #     m_n1[b-2] = ant         # Revert
-    #     blocks_array[n-2] = m_n1
-    #     modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
-    # # Else ¿?
+    if resp == error_mssg:      # There is an error message, go back
+        print("No valida, valor encontrado para C[n-1][b-1] incosistente")
+
+    m_n1[b-2] = ant             # Always Revert
+    blocks_array[n-2] = m_n1
+    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
 
     i_n = i^1 # XOR para obtener I_[n][b-1]. i = M[n-1][b-1], 1 = 0x01
     c_n1_b1 = utils.split_blocks(c_text, block_size//8)[n-2][b-1] # Get clean C[n-1][b-1]
