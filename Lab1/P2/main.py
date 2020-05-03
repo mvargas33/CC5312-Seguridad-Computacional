@@ -188,17 +188,23 @@ def decode_last_block2(c_text, block_size, i_n_b1):
 
 
 def decode_all_blocks2(c_text, block_size):
+    """
+    Dado un texto cifrado y tamaño de bloque,
+    Retorna el texto plano
+    """
     blocks_array = utils.split_blocks(c_text, block_size//8)# Get cyphered text as an bytearray
     n = len(blocks_array)                                   # Cantidad n de bloques
-    plain_text = bytearray(n-1)
+    plain_text = bytearray()
 
     for i in range(n-1, 0, -1):
+        print("Vamos en el bloque: " + str(i+1) + "/" + str(n))
         modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array[0:i]))
 
         i_n_b1, b = decode_last_char(modified_c_text.encode(), block_size)
-        plain_text[i-1] = decode_last_block2(modified_c_text.encode(), block_size, i_n_b1)
+        plain_text.extend(decode_last_block2(modified_c_text.encode(), block_size, i_n_b1))
 
-    print(binascii.unhexlify(utils.bytes_to_hex(utils.join_blocks(blocks_array))))
+    print(plain_text)
+    print(binascii.unhexlify(utils.bytes_to_hex(plain_text)))
     return plain_text
 
 
