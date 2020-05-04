@@ -109,7 +109,7 @@ def decode_last_char(c_text, block_size):
         if(i == 256):
             print("Se han probado los 256 valores de padding sin éxito")
             exit(1)
-    
+    print(i)
     i_n = i^1 # XOR para obtener I_[n][b-1]. i = M[n-1][b-1], 1 = 0x01
     c_n1_b1 = utils.split_blocks(c_text, block_size//8)[n-2][b-1] # Get clean C[n-2][b-1]
     print(i_n^c_n1_b1)
@@ -194,6 +194,7 @@ def decode_all_blocks2(c_text, block_size):
     """
     Dado un texto cifrado y tamaño de bloque,
     Retorna el texto plano del texto cifrado
+    :param c_text: byte-like array
     """
     blocks_array = utils.split_blocks(c_text, block_size//8)    # Get cyphered text as an bytearray
     n = len(blocks_array)                                       # Cantidad n de bloques
@@ -201,11 +202,11 @@ def decode_all_blocks2(c_text, block_size):
 
     for i in range(n-1, 0, -1):
         print("Vamos en el bloque: " + str(i+1) + "/" + str(n))
-        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array[0:i]))
+        modified_c_text = utils.join_blocks(blocks_array[0:i+1])      # Ya es byte-like
 
         print("Vamos en el byte: " + str(block_size//8 - 1))
-        i_n_b1, b = decode_last_char(modified_c_text.encode(), block_size)
-        plain_text.extend(decode_last_block2(modified_c_text.encode(), block_size, i_n_b1))
+        i_n_b1, b = decode_last_char(modified_c_text, block_size)   # Ya es byte-like
+        plain_text.extend(decode_last_block2(modified_c_text, block_size, i_n_b1))
 
     print(plain_text)
     print(binascii.unhexlify(utils.bytes_to_hex(plain_text)))
@@ -225,7 +226,7 @@ if __name__ == "__main__":
             print("[Client] \"{}\"".format(response))
 
             resp = utils.send_message(sock_A_input, sock_A_output, response)
-            decode_all_blocks2(resp.encode(), block_size)
+            decode_all_blocks2(utils.hex_to_bytes(resp), block_size)
 
             #i_n_b1, b = decode_last_char(resp.encode(), block_size)
             #decode_last_block2(resp.encode(), block_size, i_n_b1)
