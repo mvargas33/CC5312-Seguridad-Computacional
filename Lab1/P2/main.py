@@ -109,10 +109,9 @@ def decode_last_char(c_text, block_size):
         if(i == 256):
             print("Se han probado los 256 valores de padding sin éxito")
             exit(1)
-    print(i)
+    
     i_n = i^1 # XOR para obtener I_[n][b-1]. i = M[n-1][b-1], 1 = 0x01
     c_n1_b1 = utils.split_blocks(c_text, block_size//8)[n-2][b-1] # Get clean C[n-2][b-1]
-    print(i_n^c_n1_b1)
     return i_n, i_n^c_n1_b1 # XOR para obtener B_[n][b-1]
 
 def decode_last_block2(c_text, block_size, i_n_b1):
@@ -143,7 +142,7 @@ def decode_last_block2(c_text, block_size, i_n_b1):
 
         for i in range(conocemos, b):                           # [.........[conocemos]....[b-1]]
             m_n1[i] = i_n[i]^paddingByte                        # M[n-1] = I[n] XOR PaddingByte, para que al hacer el servidor M[n-1][i] XOR I[n-1][i] de PaddingByte
-
+        
         i = 0                                                   # De 0 a 256
         while True:
             m_n1[queremos] = i                                  # M[n-1][Queremos] = i
@@ -183,10 +182,10 @@ def decode_last_block2(c_text, block_size, i_n_b1):
     # Obtener el último bloque
     c_n1 = utils.split_blocks(c_text, block_size//8)[n-2]       # Get clean C[n-2][b-1]
     b_n = bytearray(b)                                          # Crea bytearray de largo 128//8 = 16 bytes
-    for i in range(0, b - 1):                                   # Copia del byte 0 al 15
+    for i in range(0, b):                                   # Copia del byte 0 al 15
         b_n[i] = i_n[i]^c_n1[i]
     print(b_n)
-    print(binascii.unhexlify(b_n.hex()))
+    #print(binascii.unhexlify(b_n.hex()))
     return b_n                                                  # Return bytearray del texto descifrado
 
 
@@ -198,7 +197,7 @@ def decode_all_blocks2(c_text, block_size):
     """
     blocks_array = utils.split_blocks(c_text, block_size//8)    # Get cyphered text as an bytearray
     n = len(blocks_array)                                       # Cantidad n de bloques
-    plain_text = bytearray()
+    plain_text = []
 
     for i in range(n-1, 0, -1):
         print("Vamos en el bloque: " + str(i+1) + "/" + str(n))
@@ -206,10 +205,13 @@ def decode_all_blocks2(c_text, block_size):
 
         print("Vamos en el byte: " + str(block_size//8 - 1))
         i_n_b1, b = decode_last_char(modified_c_text, block_size)   # Ya es byte-like
-        plain_text.extend(decode_last_block2(modified_c_text, block_size, i_n_b1))
+        plain_text.append(decode_last_block2(modified_c_text, block_size, i_n_b1))
 
-    print(plain_text)
-    print(binascii.unhexlify(utils.bytes_to_hex(plain_text)))
+    print('')
+    for i in range(len(plain_text)-1, 0 - 1, -1):
+        print(plain_text[i])
+    #print(plain_text)
+    #print(binascii.unhexlify(utils.bytes_to_hex(plain_text)))
     return plain_text
 
 
@@ -223,7 +225,7 @@ if __name__ == "__main__":
         try:
             
             response = input("send a message: ") # Read a message from standard input
-            print("[Client] \"{}\"".format(response))
+            print("[Client] Plaintext:  \"{}\"".format(response))
 
             resp = utils.send_message(sock_A_input, sock_A_output, response)
             decode_all_blocks2(utils.hex_to_bytes(resp), block_size)
@@ -231,7 +233,8 @@ if __name__ == "__main__":
             #i_n_b1, b = decode_last_char(resp.encode(), block_size)
             #decode_last_block2(resp.encode(), block_size, i_n_b1)
 
-            print("[Server] \"{}\"".format(resp))
+            print('')
+            print("[Server] Ciphertext: \"{}\"".format(resp))
         except Exception as e:
             print(e)
             print("Closing...")
