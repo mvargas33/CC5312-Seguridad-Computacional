@@ -10,6 +10,9 @@ ADDRESS_B = ("cc5312.xor.cl", 5313)
 sock_A_input, sock_A_output= utils.create_socket(ADDRESS_A)
 sock_B_input, sock_B_output = utils.create_socket(ADDRESS_B)
 
+sock_C_input, sock_C_output= utils.create_socket(ADDRESS_A)
+sock_D_input, sock_D_output = utils.create_socket(ADDRESS_B)
+
 def senAResendB(message):
     """
     Enía message a A, y respues de A la envía a B.
@@ -17,6 +20,17 @@ def senAResendB(message):
     """
     resp_A = utils.send_message(sock_A_input, sock_A_output, message)
     resp_B = utils.send_message(sock_B_input, sock_B_output, resp_A)
+    # if not (resp_B == message):
+    #     print(resp_B)
+    return resp_B, len(resp_A)
+
+def senAResendB2(message):
+    """
+    Enía message a A, y respues de A la envía a B.
+    Retorna Respuesta de B.
+    """
+    resp_A = utils.send_message(sock_C_input, sock_C_output, message)
+    resp_B = utils.send_message(sock_D_input, sock_D_output, resp_A)
     # if not (resp_B == message):
     #     print(resp_B)
     return resp_B, len(resp_A)
@@ -38,14 +52,14 @@ def calcBlockSize():
     msg = "a"
     chr_aumentados_para_cambio = []
     i = 0
-    rB, largoA = senAResendB(msg)
+    rB, largoA = senAResendB2(msg)
     i = 1
     largo_anterior = largoA
     msg = "aa"
     counter = 0
     while(actual < N):
         #time.sleep(0.01) # No sobrecargar al servidor
-        rB, largoA = senAResendB(msg)
+        rB, largoA = senAResendB2(msg)
         i+=1
         if(rB == msg): # Correctitud
             if(largoA > largo_anterior):
@@ -81,34 +95,43 @@ def decode_last_char(c_text, block_size):
     for i in range(0, b - 1):                               # Copia del byte 0 al 15
         m_n1[i] = blocks_array[n-2][i]                      # Obtener M[n-1] copiando de C[n-1]
 
-    i = 0                                                   # De 0 a 256
+    i = 1                                                   # De 0 a 256
+    print("Decode last char", flush = True)
+    ant_mn1 = m_n1[b-1] 
     while True:
-        m_n1[b-1] = i                                       # M[n-1][BlockSize-1] = i
-        blocks_array[n-2] = m_n1                            # Sobrescribimos el blocks_Array[n-2] por el M[n-1]
-        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
-        resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Send to sock_B
-        if not resp.startswith(error_mssg):                 # Check if there is not a padding error, we have a candidate
-                                                            # Validar: Asegurar que texto plano termina en 0x01
-            ant = m_n1[b-2]                                 # M[n-1][b-2] penúltimo valor antiguo
-            m_n1[b-2] = ant+1 % 256                         # Cambiar a otro valor
-            blocks_array[n-2] = m_n1                        # Modificamos M[n-2]
-            modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))   # Joinblocks and then cast to hex
-            resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Acá tenemos que el texto descifrado es del estilo [.....[0xfe][0x01]]
+        if (ant_mn1 == i):
+            pass
+        else:
+            print(i, flush=True)
+            m_n1[b-1] = i                                       # M[n-1][BlockSize-1] = i
+            blocks_array[n-2] = m_n1                            # Sobrescribimos el blocks_Array[n-2] por el M[n-1]
+            modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
+            resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Send to sock_B
+            print(resp, flush=True)
+            if not resp.startswith(error_mssg):                 # Check if there is not a padding error, we have a candidate
+                                                                # Validar: Asegurar que texto plano termina en 0x01
+                ant = m_n1[b-2]                                 # M[n-1][b-2] penúltimo valor antiguo
+                m_n1[b-2] = ant+125 % 256                       # Cambiar a otro valor
+                blocks_array[n-2] = m_n1                        # Modificamos M[n-2]
+                modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))   # Joinblocks and then cast to hex
+                resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Acá tenemos que el texto descifrado es del estilo [.....[0xfe][0x01]]
 
-            if resp == error_mssg:                          # Si no validó estamos en un caso donde podríamos haber encontrado un falso positivo, ej: que el último byte descifrado fuera [0x02] y el byte anterior cifrado [0x02]. Ahora da [...[0xfe][0x02]] y no pasa
-                print("No valida, valor encontrado para M[n-1][b-1] incosistente, buscando otro valor ...")
-                m_n1[b-2] = ant                             # Always Revert al valor C[n-1][b-2] original
-                blocks_array[n-2] = m_n1
-                modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
-            else:
-                m_n1[b-2] = ant                             # Always Revert
-                blocks_array[n-2] = m_n1
-                modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
-                break                                       # Pasó validación, encontramos M[n-1][b-1]
-        i+=1
-        if(i == 256):
+                if resp.startswith(error_mssg):                          # Si no validó estamos en un caso donde podríamos haber encontrado un falso positivo, ej: que el último byte descifrado fuera [0x02] y el byte anterior cifrado [0x02]. Ahora da [...[0xfe][0x02]] y no pasa
+                    print("No valida, valor encontrado para M[n-1][b-1] incosistente, buscando otro valor ...")
+                    m_n1[b-2] = ant                             # Always Revert al valor C[n-1][b-2] original
+                    blocks_array[n-2] = m_n1
+                    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+                else:
+                    m_n1[b-2] = ant                             # Always Revert
+                    blocks_array[n-2] = m_n1
+                    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+                    break                                       # Pasó validación, encontramos M[n-1][b-1]
+        
+        if(i == 0):
             print("Se han probado los 256 valores de padding sin éxito")
             exit(1)
+
+        i = (i+1)%256
     
     i_n = i^1 # XOR para obtener I_[n][b-1]. i = M[n-1][b-1], 1 = 0x01
     c_n1_b1 = utils.split_blocks(c_text, block_size//8)[n-2][b-1] # Get clean C[n-2][b-1]
@@ -132,7 +155,7 @@ def decode_last_block2(c_text, block_size, i_n_b1):
 
     queremos = b - 2                                            # Queremos conocer b - 2 al inicio
     while queremos >= 0:
-        print("Vamos en el byte: " + str(queremos))
+        print("Vamos en el byte: " + str(queremos), flush = True)
         conocemos = queremos + 1                                # Conocemos de b-1 : b-1, 
         paddingByte = b - queremos                              # Padding byte
 
@@ -143,38 +166,44 @@ def decode_last_block2(c_text, block_size, i_n_b1):
         for i in range(conocemos, b):                           # [.........[conocemos]....[b-1]]
             m_n1[i] = i_n[i]^paddingByte                        # M[n-1] = I[n] XOR PaddingByte, para que al hacer el servidor M[n-1][i] XOR I[n-1][i] de PaddingByte
         
-        i = 0                                                   # De 0 a 256
+        i = 1                                                   # De 0 a 256
+        ant_mn1 = m_n1[b-1]
         while True:
-            m_n1[queremos] = i                                  # M[n-1][Queremos] = i
-            blocks_array[n-2] = m_n1                            # Sobrescribimos el blocks_Array[n-2] por el M[n-1]
-            modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
-            resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Send to sock_B
-            if not resp.startswith(error_mssg):                 # Check if there is not a padding error, we have a candidate
-                if queremos != 0:                               # Si el es primer byte, no podemos validar
-                    
-                    # Validar: Asegurar que texto plano termina en 0x01
-                    ant = m_n1[queremos-1]                      # M[n-1][queremos-1] penúltimo valor antiguo
-                    m_n1[queremos-1] = ant+1 % 256              # Cambiar a otro valor
-                    blocks_array[n-2] = m_n1                    # Modificamos M[n-2]
-                    modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))   # Joinblocks and then cast to hex
-                    resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Ask if it still works
+            if (i == ant_mn1):
+                pass
+            else:
+                print(i, flush=True)
+                m_n1[queremos] = i                                  # M[n-1][Queremos] = i
+                blocks_array[n-2] = m_n1                            # Sobrescribimos el blocks_Array[n-2] por el M[n-1]
+                modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
+                resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Send to sock_B
+                print(resp, flush=True)
+                if not resp.startswith(error_mssg):                 # Check if there is not a padding error, we have a candidate
+                    if queremos != 0:                               # Si el es primer byte, no podemos validar
+                        
+                        # Validar: Asegurar que texto plano termina en 0x01
+                        ant = m_n1[queremos-1]                      # M[n-1][queremos-1] penúltimo valor antiguo
+                        m_n1[queremos-1] = ant+1 % 256              # Cambiar a otro valor
+                        blocks_array[n-2] = m_n1                    # Modificamos M[n-2]
+                        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))   # Joinblocks and then cast to hex
+                        resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Ask if it still works
 
-                    if resp.startswith(error_mssg):             # No validó There is an error message, go back
-                        print("No valida, valor encontrado para M[n-1][queremos] incosistente, buscando otro valor ...")
-                        m_n1[queremos-1] = ant                  # Always Revert
-                        blocks_array[n-2] = m_n1
-                        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+                        if resp.startswith(error_mssg):             # No validó There is an error message, go back
+                            print("No valida, valor encontrado para M[n-1][queremos] incosistente, buscando otro valor ...")
+                            m_n1[queremos-1] = ant                  # Always Revert
+                            blocks_array[n-2] = m_n1
+                            modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+                        else:
+                            m_n1[queremos-1] = ant                  # Always Revert
+                            blocks_array[n-2] = m_n1
+                            modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
+                            break                                   # Pasó validación, encontramos M[n-1][queremos]
                     else:
-                        m_n1[queremos-1] = ant                  # Always Revert
-                        blocks_array[n-2] = m_n1
-                        modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))
-                        break                                   # Pasó validación, encontramos M[n-1][queremos]
-                else:
-                    break
-            i+=1                                                # Try next i
-            if(i == 256):
+                        break
+            if (i == 0):
                 print("Se han probado los 256 valores de padding sin éxito")
                 exit(1)
+            i = (i + 1)%256                         # Try next i
                 
         i_n[queremos] = i^paddingByte # XOR para obtener I_[n][queremos]. i = M[n-1][queremos], paddingByte = 0x02, 0x03 ...
         queremos -= 1
@@ -220,7 +249,7 @@ if __name__ == "__main__":
     # Call block_size here because of strange issue that happened
     # block_size = calcBlockSize()
     
-    block_size = 16*8
+    block_size = calcBlockSize()*8
     while True:
         try:
             
@@ -242,4 +271,8 @@ if __name__ == "__main__":
             sock_A_output.close()
             sock_B_input.close()
             sock_B_output.close()
+            sock_C_input.close()
+            sock_C_output.close()
+            sock_D_input.close()
+            sock_D_output.close()
             break
