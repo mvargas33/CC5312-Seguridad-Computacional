@@ -1,3 +1,7 @@
+## Laboratorio 1
+
+Respuesta detalla y análisis en Reporte PDF. Para ejecutar el código seguir las siguientes instrucciones.
+
 ### P1
 
 - Posicionarse en la carpeta correspondiente a la P1.
