@@ -91,7 +91,7 @@ def decode_last_char(c_text, block_size):
     blocks_array = utils.split_blocks(c_text, block_size//8)# Get cyphered text as an bytearray
     n = len(blocks_array)                                   # Cantidad n de bloques
     b = block_size//8                                       # Cantidad b de bytes por bloque
-
+    
     m_n1 = bytearray(b)                                     # Crea bytearray de largo 128//8 = 16 bytes
     for i in range(0, b - 1):                               # Copia del byte 0 al 15
         m_n1[i] = blocks_array[n-2][i]                      # Obtener M[n-1] copiando de C[n-1]
@@ -158,7 +158,7 @@ def decode_last_block2(c_text, block_size, i_n_b1):
 
     queremos = b - 2                                            # Queremos conocer b - 2 al inicio
     while queremos >= 0:
-        #print("Descifrando byte: " + str(queremos), flush = True)
+        print("Descifrando byte: " + str(queremos), flush = True)
         conocemos = queremos + 1                                # Conocemos de b-1 : b-1, 
         paddingByte = b - queremos                              # Padding byte
 
@@ -233,10 +233,10 @@ def decode_all_blocks2(c_text, block_size):
 
     for i in range(n-1, 0, -1):
         print("Vamos en el bloque: " + str(i+1) + "/" + str(n))
-        modified_c_text = utils.join_blocks(blocks_array[0:i+1])      # Ya es byte-like
+        modified_c_text = utils.join_blocks(blocks_array[0:i+1])        # Ya es byte-like
 
-        print("Vamos en el byte: " + str(block_size//8 - 1))
-        i_n_b1, b = decode_last_char(modified_c_text, block_size)   # Ya es byte-like
+        print("Descifrando byte: " + str(block_size//8 - 1))            # Print Byte 15 hardoceado
+        i_n_b1, b = decode_last_char(modified_c_text, block_size)       # Ya es byte-like
         plain_text.append(decode_last_block2(modified_c_text, block_size, i_n_b1))
 
     print('')
