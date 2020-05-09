@@ -17,7 +17,7 @@ if __name__ == '__main__':
 
     p,q = get_p_q(N) # Llamamos a método en archivo que se aprovecha de vulnerabilidad
     
-    print("p: " + str(p) + " q:  " + str(q))
+    # print("p: " + str(p) + " q:  " + str(q))
 
     if( p*q == N):
         print("p % q FOUND!")
@@ -28,7 +28,7 @@ if __name__ == '__main__':
         # d is the inverse of e mod phi
         d = mod_inv(e, phi)
 
-        print("d: " + str(d))
+        # print("d: " + str(d))
 
         # some useful precalculations required by Cryptography library (here is not what you are looking for)
         iqmp = rsa_crt_iqmp(p, q)
@@ -48,7 +48,8 @@ if __name__ == '__main__':
             label=None
         ))
         with open("./deciphered-MANUAL.txt", 'wb') as f:
-            print("Saving deciphered version of text...")
+            print("Saving hacked deciphered version of text in deciphered-MANUAL.txt...")
+            print("To check results, compare deciphered.txt with deciphered-MANUAL.txt")
             f.write(decipheredDoc)
 
         end = time.time()
