@@ -14,34 +14,8 @@ if __name__ == '__main__':
     p_key = load_public_key_file(constants.PUBLIC_KEY_PATH)
     N = get_n(p_key)
     sqrt_N = int(Decimal(N).sqrt().to_integral_exact())
-    """
-    # print(sqrt_N*sqrt_N/N)
-    # tolerancia = 2**512 # Peor caso
-    print(sqrt_N)
-    # A = sqrt_N - tolerancia # 1 # Next prime de 2
-    # print(A)
-    # B = sqrt_N # 2**1024 - 1
-    # print(B)
-    # if(B > N):
-    #     B = N
-    e = 65537
-    d = 0
 
-    while(True ):
-        # print("A: " + str(A) + "\nB: " + str(B) + "\nDELTA: " + str(B-A))
-        # mid = (B-A)//2 + A
-        #print(mid)
-        p = prev_prime(sqrt_N)
-        q = N/p # next_prime(p)
-        if(p*q == N):
-            break
-        elif(p*q > N):
-            B = mid
-        else:
-            A = mid + 1
-    """
-
-    p,q = get_p_q(N)
+    p,q = get_p_q(N) # Llamamos a método en archivo que se aprovecha de vulnerabilidad
     
     print("p: " + str(p) + " q:  " + str(q))
 
