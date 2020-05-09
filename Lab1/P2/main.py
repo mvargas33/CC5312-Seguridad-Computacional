@@ -72,7 +72,7 @@ def decode_last_char(c_text, block_size):
     Retorna el último byte del mensaje original del texto cifrado
     :param c_text: byte-like message
     """
-    error_mssg = "pkcs7: invalid padding"                   # Prefijo de error típico de padding
+    error_mssg = "pkcs7"                                    # Prefijo de error típico de padding
     blocks_array = utils.split_blocks(c_text, block_size//8)# Get cyphered text as an bytearray
     n = len(blocks_array)                                   # Cantidad n de bloques
     b = block_size//8                                       # Cantidad b de bytes por bloque
@@ -93,8 +93,9 @@ def decode_last_char(c_text, block_size):
             m_n1[b-2] = ant+1 % 256                         # Cambiar a otro valor
             blocks_array[n-2] = m_n1                        # Modificamos M[n-2]
             modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array))   # Joinblocks and then cast to hex
+            print("Enviando nuevo mensaje a B")
             resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Acá tenemos que el texto descifrado es del estilo [.....[0xfe][0x01]]
-
+            print(resp)
             if resp == error_mssg:                          # Si no validó estamos en un caso donde podríamos haber encontrado un falso positivo, ej: que el último byte descifrado fuera [0x02] y el byte anterior cifrado [0x02]. Ahora da [...[0xfe][0x02]] y no pasa
                 print("No valida, valor encontrado para M[n-1][b-1] incosistente, buscando otro valor ...")
                 m_n1[b-2] = ant                             # Always Revert al valor C[n-1][b-2] original
@@ -112,6 +113,7 @@ def decode_last_char(c_text, block_size):
     
     i_n = i^1 # XOR para obtener I_[n][b-1]. i = M[n-1][b-1], 1 = 0x01
     c_n1_b1 = utils.split_blocks(c_text, block_size//8)[n-2][b-1] # Get clean C[n-2][b-1]
+    print(i_n^c_n1_b1)
     return i_n, i_n^c_n1_b1 # XOR para obtener B_[n][b-1]
 
 def decode_last_block2(c_text, block_size, i_n_b1):
@@ -120,7 +122,7 @@ def decode_last_block2(c_text, block_size, i_n_b1):
     Retorna el último bloque del mensaje original del texto cifrado
     :param c_text: byte-like message
     """
-    error_mssg = "pkcs7: invalid padding"                       # Prefijo de error típico de padding
+    error_mssg = "pkcs7"                                        # Prefijo de error típico de padding
     blocks_array = utils.split_blocks(c_text, block_size//8)    # Get cyphered text as an bytearray
     n = len(blocks_array)                                       # Cantidad n de bloques
     b = block_size//8                                           # Cantidad b de bytes por bloque
@@ -148,7 +150,9 @@ def decode_last_block2(c_text, block_size, i_n_b1):
             m_n1[queremos] = i                                  # M[n-1][Queremos] = i
             blocks_array[n-2] = m_n1                            # Sobrescribimos el blocks_Array[n-2] por el M[n-1]
             modified_c_text = utils.bytes_to_hex(utils.join_blocks(blocks_array)) # Joinblocks and then cast to hex
+            print("Enviando nuevo mensaje a B")
             resp = utils.send_message(sock_B_input, sock_B_output, modified_c_text) # Send to sock_B
+            print(resp)
             if not resp.startswith(error_mssg):                 # Check if there is not a padding error, we have a candidate
                 if queremos != 0:                               # Si el es primer byte, no podemos validar
                     
