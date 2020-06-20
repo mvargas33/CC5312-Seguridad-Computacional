@@ -20,7 +20,9 @@ Luego se probó en la región de comentarios un comando de Javascript para verif
 
 Utilizando la estructura del código en Javascript de la clase auxiliar 5 (XSS), se generó un código que enviaba mediante el método POST las cookies al servidor HTTP generado anteriormente, para de esta forma obtener la cookie.
 
-Con la cookie obtenida se "bypasseo" la sesión de administrador permitiéndonos ingresar un nuevo plato de comida para el día de hoy.
+Con la cookie obtenida se "bypasseo" la sesión de administrador permitiéndonos ingresar un nuevo plato de comida para el día de hoy, utilizando la siguiente cookie:
+
+`PHPSESSID : c9aab06c8233316ba68fdf25918fa261`
 
 Para más detalles ver la sección anexo.
 
