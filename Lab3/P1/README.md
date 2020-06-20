@@ -42,9 +42,13 @@ Sitio no hackeado:
 
 ![Sitio no hackeado](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/1%20Site%20not%20yet%20Hacked.png)
 
+Obtener IP VPN:
+
+![GET VPN IP](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/2%20VPN%20IP.png)
+
 Montando un servidor HTTP mediante WSL:
 
-![Mount and Test HTTP Server](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/2%20VPN%20IP.png)
+![Mount and Test HTTP Server](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/3%20Mount%20and%20Test%20HTTP%20Server.png)
 
 Código JS visualizado desde VS:
 
