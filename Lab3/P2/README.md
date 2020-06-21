@@ -34,6 +34,24 @@ De forma alternativa se generó una consulta que permite mostrar el valor de la 
 
 #### Explicación del Script de Python para realizar la inyección ciega de forma automática
 
+
+Inicialmente se importan las bibliotecas necesarias para realizar la conexión a internet, mediante la biblioteca `requests`. Posteriomente en un diccionario se almacena el valor de la cookie encontrada en la P1, además de generar una lista con las alternativas alfanuméricas.
+
+Foto aquí.
+
+Luego se genera un código que obtiene un valor de verdad de acuerdo a si el tiempo de sleep es mayor o igual al tiempo fijado anteriormente en la variable `sleep_time` (3 segundos). Inicialmente se escribe una versión "tunneable" de la consulta mediante un f_string `query_d = f"RSA' WHERE nombre = 'platodeldia'; SELECT CASE when (SELECT 1 FROM configuraciones WHERE nombre ='FLAG' and valor like '{elem}') = 1 then pg_sleep({sleep_time}) else pg_sleep(0) end; --"`, de esta forma es posible automatizar el cambio de los parámetros `elem` y `sleep_time`.
+
+En el valor de payload se obtiene el id del input del formulario, el que corresponde a `plato_del_dia`. Se obtiene el tiempo actual y se realiza la request POST, añadiendo las cookies y el valor de verify en false debido a la no verificación HTTTPS del sitio. Cuando termina la request se obtiene el tiempo de término para realizar un delta que permita discernir entre si correspondió a un acierto o no, lo que se obtiene de acuerdo a si delta es mayor o igual a `sleep_time`, retornado `True` y `False` si no es mayor.
+
+Foto aquí.
+
+Finalmente se realiza el ciclo while, el que al principio de cada iteración obtiene el largo actual de la FLAG, pues la condición de término es si no agrega más carácteres al valor de la FLAG. Dentro del ciclo se tiene un ciclo for que itera por los posibles carácteres alfanuméricos, los que se van testeando utilizando la función `send_and_delta_time_it(elem)`, y si retorna `True` se agrega a la clave si no continúa iterando.
+
+Cuando los largos de las claves son iguales, entonces se detiene el algoritmo imprimiendo en pantalla el valor de la FLAG obtenida.
+
+Foto aquí.
+
+
 #### Explicar dos mitigaciones posibles para el o los problemas que permitieron extraer este valor (FLAG), con sus beneficios y limitaciones
 
 - Una mitigación puede ser validar el input en cada formulario. Por ejemplo, se pueden usar expresiones regulares para definir que los platos sólo pueden ser alfanuméricos y espacios: Esto descarta caracteres como ';','*', '--', '(', ')' que son típicos de inyecciones SQL. Estas validaciones se deben hacer en el cliente, pero sobretodo en el servidor antes de guardar los valores en la base de datos. Esto limita bastante los valores que puede tomar el input, lo cual es un claro beneficio. Dentro de las limitaciones tenemos que no podemos poder nombres raros a los platos pero qué mas da.
