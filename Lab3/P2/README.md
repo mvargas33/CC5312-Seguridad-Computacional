@@ -36,4 +36,8 @@ De forma alternativa se generó una consulta que permite mostrar el valor de la 
 
 #### Explicar dos mitigaciones posibles para el o los problemas que permitieron extraer este valor (FLAG), con sus beneficios y limitaciones
 
-TODO
+- Una mitigación puede ser validar el input en cada formulario. Por ejemplo, se pueden usar expresiones regulares para definir que los platos sólo pueden ser alfanuméricos y espacios: Esto descarta caracteres como ';','*', '--', '(', ')' que son típicos de inyecciones SQL. Estas validaciones se deben hacer en el cliente, pero sobretodo en el servidor antes de guardar los valores en la base de datos. Esto limita bastante los valores que puede tomar el input, lo cual es un claro beneficio. Dentro de las limitaciones tenemos que no podemos poder nombres raros a los platos pero qué mas da.
+
+- Otra mitigación son las consultas parametrizadas o precompiladas. En estas consultas el input no se concatena directamente con la consulta, si no que el input se reemplaza más tarde. Por ejemplo, tenemos la consulta precompilada `SELECT nombre FROM Usuarios WHERE nombre =? and clave =?"`. En este caso no podemos inyectar código del estilo `(SUBQUERY);--` en nombre. Simplemente se buscará en la tabla un usuario de nombre `(SUBQUERY);--` y que de seguro no se encontrará. Lo que pasa acá es que las acciones de la consulta son precompiladas antes de hacer el input, la secuencia de pasos ya está definida desde antes y por lo tanto no es modificable.
+
+
