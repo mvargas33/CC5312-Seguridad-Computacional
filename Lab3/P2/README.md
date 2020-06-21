@@ -81,10 +81,6 @@ Valor de la Flag:
 
 ![Flag Value](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P2/3%20FLAG2.png)
 
-SQLQuery para obtener la Flag directamente:
-
-![Direct Query](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P2/4%20SQLQueryFail.png)
-
 Sitio mostrando la Flag:
 
 ![Flag en el sitio](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P2/5%20SQLQueryFailProof.png)
