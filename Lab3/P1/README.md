@@ -30,7 +30,9 @@ Para más detalles ver la sección anexo.
 
 #### Explicar dos mitigaciones que hubiesen hecho que el ataque no resultara con sus beneficios y limitaciones (las mitigaciones pueden ser al mismo problema o problemas distintos)
 
-TODO
+- La mitigación más clara consiste en usar HTML safe chars (encode de caracteres especiales). De esta forma el script inyectado no se hubiera ejecutado porque el encode de caracteres del comentario hubiera sido distinto. No encontramos ninguna limitación en el uso de esta estrategia, pero si problemas si no se usa. Por ejemplo, una página que guarda películas podría basar sus URLS en valores de la base datos y generar links del estilo `peliculas.com/<pelicula>`. Si la película es por ejemplo `Fast & Furious`, el link `peliculas.com/Fast & Furious` no funcionaría, se necesita encodear el espacio e "&", como '+' y '%26' para que el link proceda quedando `peliculas.com/Fast+%26+Furious`. De lo contrario el navegador no sabrá cómo interpretar el link y se producrán errores. Existe todo un estándar de caracteres peligrosos o no seguros.
+
+- Otra medida es filtrar los comentarios que contengan palabras claves como `<script>` o similares. De esta forma se puede detectar tempranamente contenido no deseado en los inputs. Esto tiene la limitación de detectar falsos positivos, por ejemplo, en un blog de Javascript sería usual poner comentarios con `<script>`.
 
 ### Anexo
 
