@@ -42,50 +42,76 @@ Objetivo:
 
 ![The Plan](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/0%20How%20to%20hack%20it.png)
 
+Ref : 0 How to hack it
+
 Sitio no hackeado:
 
 ![Sitio no hackeado](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/1%20Site%20not%20yet%20Hacked.png)
+
+Ref : 1 Site not yet Hacked
 
 Obtener IP VPN:
 
 ![GET VPN IP](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/2%20VPN%20IP.png)
 
+Ref : 2 VPN IP
+
 Montando un servidor HTTP mediante WSL:
 
 ![Mount and Test HTTP Server](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/3%20Mount%20and%20Test%20HTTP%20Server.png)
+
+Ref : 3 Mount and Test HTTP Server
 
 Código JS visualizado desde VS:
 
 ![VS JS](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/4%20Code%20in%20VS.png)
 
+Ref : 4 Code in VS
+
 Añadir un comentario en el sitio:
 
 ![Add Comment](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/5%20AddComment.png)
+
+Ref : 5 AddComment
 
 Código malicioso añadido con éxito
 
 ![Malicious JS](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/6%20MaliciousJSCode.png)
 
+Ref : 6 MaliciousJSCode
+
 ¡Tenemos la cookie!
 
 ![I have the cookie](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/7%20Mounted%20Server%20and%20Cookie.png)
+
+Ref : 7 Mounted Server and Cookie
 
 Estado antes de usar la cookie:
 
 ![Before use the cookie](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/8%20Before%20Inject%20Cookie.png)
 
+Ref : 8 Before Inject Cookie
+
 Cookie anterior:
 
 ![Before use the cookie see the cookie](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/9%20Before%20Inject%20Cookie.png)
+
+Ref : 9 Before Inject Cookie
 
 Cookie añadida:
 
 ![Cookie added](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/10%20Cookie%20Injected.png)
 
+Ref : 10 Cookie Injected
+
 Tenemos privilegios de admin:
 
 ![Im an admin](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/11%20Configure%20Hacked.png)
 
+Ref : 11 Configure Hacked
+
 El sitio ha sido hackeado de forma exitosa:
 
 ![Site hacked](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P1/12%20Site%20Has%20Been%20Hacked.png)
+
+Ref : 12 Site Has Been Hacked
