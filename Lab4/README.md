@@ -76,8 +76,13 @@ Por lo tanto la consulta más eficiente sólo contiene llaves de largo 1 a ítem
 
 Nos acotaremos entonces al caso de llaves de largo 1 byte.
 
+TODO: Se podrá hacer `gets a a a a a a a a a a ...` ?
 
+Si es así, buscar en el servidor una llave de un elemento con mayor tamaño podría ser mejor si el factor |tamaño ítem|/|tamaño llave| es mejor que |1400|/|1|
 
+Se busca con `stats slabs`, luego `stats cachedump <slab class> <number os items to dump>` para saber la key. Se usa el ITEM con mayor size en bytes.
+
+Fuente: https://lzone.de/blog/How-to%20Dump%20Keys%20from%20Memcache
 
 
 
