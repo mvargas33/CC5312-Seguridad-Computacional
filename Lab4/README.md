@@ -103,3 +103,13 @@ Pero como hemos concluirdo, la mayor respuesta que permite UDP es de 1400 bytes,
 ## Conclusiones
 
 La mejor eficiencia obtenida es aproximadamente 1400/7 = 200, dado que se guarda el par (key, value), donde key es de 1 byte y value de 1400, y luego se hace `get key\r\n`.
+
+## DNS
+
+1) La utilidad original del servicio DNS es resolver la IP de un name server, puesto que, para los humanos es más sencillo recordar conjuntos de palabras que conjuntos numéricos. Luego este servicio, dado un name server, por ejemplo : ucursos.cl, devuelve su ip asociada al navegador para poder, finalmente, acceder al sitio web.
+
+2) Se adjunta en el script las modificaciones realizadas con lo que a la obtención de la salida estándar refiere.
+
+3) Se propone para maximizar la eficiencia ocupar el total de RR's permitidas por el protocolo DNS, llenando el espacio designado del protocolo a estas respuestas, para así obtener una respuesta emitida por el servidor más grande de lo que se consulta. Para realizarlo se propone obtener un dominio que contenga varios subdominios para así enviar los RR's correspondientes a cada subdominio asociado al recorrido de la resolución enviada al servicio de DNS.
+
+4) Para maximizarla se debería eliminar las limitaciones de cortar una respuesta en la respuesta recibida por el DNS, puesto que, en un datagrama UDP, los paquetes son de tamaño fijo.

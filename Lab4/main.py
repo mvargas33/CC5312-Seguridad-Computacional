@@ -83,11 +83,11 @@ def send_memcached(ip, port):
 
     #ans.show()
 
-
+# lab4.cc5312.xor.cl </>
 def send_dns(ip, port):
     print(f"dns: {ip}:{port}")
     pkt = IP(dst=ip) / UDP(sport=54323, dport=port) / DNS(rd=1, id=12345,  qd=DNSQR(
-        qtype=16, qname="lab4.cc5312.xor.cl"))  # qtype=1 is A and DNS Request ID is 12345
+        qtype=16, qname="anakena.dcc.uchile.cl"))  # qtype=1 is A and DNS Request ID is 12345
     
     # Captura de lo enviado
     capture_1 = StringIO()
