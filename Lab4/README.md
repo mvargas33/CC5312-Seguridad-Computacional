@@ -100,7 +100,7 @@ Fuente: https://lzone.de/blog/How-to%20Dump%20Keys%20from%20Memcache
 
 Pero como hemos concluirdo, la mayor respuesta que permite UDP es de 1400 bytes, por lo tanto aunque el ítem de mayor tamaño pese 1Mb (máx default), sólo se nos enviarán los primeros 1400 bytes de este ítem.
 
-## Conclusiones
+## Conclusiones de memcached
 
 La mejor eficiencia obtenida es aproximadamente 1400/7 = 200, dado que se guarda el par (key, value), donde key es de 1 byte y value de 1400, y luego se hace `get key\r\n`.
 
