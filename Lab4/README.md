@@ -55,6 +55,8 @@ Fuente: https://github.com/memcached/memcached/blob/14521bd820869f70fbcf6e2b57c3
 
 Lo que permitiría guardar un ítem de largo cercano a 1400 bytes y obtener un eficiencia de 1400 / 7 = 200
 
+## Tryhardeando aún más
+
 Pero no nos quedaremos acá, porque memcached permite obtener varios ítemes a la vez usando comando `gets`. Por lo tanto, podemos obtener tantos ítemes como nos permita el largo de comando de 1400 bytes. El comando tiene el siguiente formato:
 
 gets <key>*\r\n
@@ -68,6 +70,8 @@ Lo cual permitiría preguntar por (1400 - 5) / 2 = 697 ítemes, si las llaves so
 
 Sin embargo, sólo tenemos 255 valores distintos en un byte, por lo tanto luego debemos usar llaves de dos bytes. Al final quedan 255 llaves de un byte, lo cual usa 510 bytes del mensaje, dejando (1400 - 5 - 510) = 885 bytes, y por lo tanto alcanzan 295 llaves más (cada pregunta usa 2 bytes para la key, y un espacio de separación). En total son 550 ítems consultados.
 
+`gets a b c d e f g h i ... aa ab ac ad ...`
+
 Y si cada ítem pesa 1400 bytes, tenemos una consulta de tamaño 1400, y se nos retornan 1400*550 bytes. Dando una eficiencia de 1400*550/1400 = 550. 
 
 Analicemos el caso en que sólo preguntamos por 255 llaves: La consulta usa 5 + 2*255 = 515 bytes, y la respuesta es de 1400*255 = 357.000 bytes. La eficiencia es 357.000/515 = 693.2.
@@ -76,13 +80,26 @@ Por lo tanto la consulta más eficiente sólo contiene llaves de largo 1 a ítem
 
 Nos acotaremos entonces al caso de llaves de largo 1 byte.
 
-TODO: Se podrá hacer `gets a a a a a a a a a a ...` ?
+Entonces, para probar el caso base guardamos dos valores en llaves a y b, con contenido de 1400 bytes. Luego hacemos la consulta `gets a b`, pero notamos que sólo recibimos el contenido de a:
 
-Si es así, buscar en el servidor una llave de un elemento con mayor tamaño podría ser mejor si el factor |tamaño ítem|/|tamaño llave| es mejor que |1400|/|1|
+(foto de gets a b)
 
-Se busca con `stats slabs`, luego `stats cachedump <slab class> <number os items to dump>` para saber la key. Se usa el ITEM con mayor size en bytes.
+Bajamos un poco las expectativas y guardamos en a y b contenido de unos pocos bytes:
+
+(foto de hola chao)
+
+Entonces nos damos cuenta que toda la respuesta del comando gets debe caber en un paquete UDP de 1400 bytes, por lo tanto, independiente de por cúantas llaves preguntemos sólo nos pueden responder hasta 1400 bytes en un sólo paquete UDP.
+
+En conclusión, `gets` no tiene ningún efecto en el ataque, y lo más eficiente es hacer `get a`, y guardar en a un valor de 1400 bytes (máx tamaño que se puede enviar y recibir en un paquete UDP para la implementación de memecached)
+
+## Otras ideas
+
+Se podría buscar el ítem que tenga más bytes almacenado en memchached y preguntar por él, utilizando `stats slabs`, y luego `stats cachedump <slab class> <number os items to dump>` buscar la key de los items y luego preguntar por las keys.
 
 Fuente: https://lzone.de/blog/How-to%20Dump%20Keys%20from%20Memcache
 
+Pero como hemos concluirdo, la mayor respuesta que permite UDP es de 1400 bytes, por lo tanto aunque el ítem de mayor tamaño pese 1Mb (máx default), sólo se nos enviarán los primeros 1400 bytes de este ítem.
 
+## Conclusiones
 
+La mejor eficiencia obtenida es aproximadamente 1400/7 = 200, dado que se guarda el par (key, value), donde key es de 1 byte y value de 1400, y luego se hace `get key\r\n`.
