@@ -120,10 +120,31 @@ def send_ntp(ip, port):
     print(f"ntp: {ip}:{port}")
     pkt = IP(dst=ip) / UDP(sport=54322, dport=port) / NTPPrivate(version=3,
                                                                  mode=7, implementation=3, request_code=42)  # 42 is mon_getlist_1
+    
+    # Captura de lo enviado
+    capture_1 = StringIO()
+    save_stdout = sys.stdout
+    sys.stdout = capture_1
+    pkt.show()
+    sys.stdout = save_stdout
+    print("len enviado:" + str(len(capture_1.getvalue())))
+    
     print(f"Sending: {pkt.summary()}")
     ans = sr1(pkt, verbose=1)
     print(f"received:")
+
+    # Captura de la respuesta
+    capture = StringIO()
+    save_stdout = sys.stdout
+    sys.stdout = capture
     ans.show()
+    sys.stdout = save_stdout 
+    print(f'RECEIVED LEN :{len(capture.getvalue())}\n')
+    
+    quotient = len(capture.getvalue())/len(capture_1.getvalue())
+    print(quotient)
+
+    #ans.show()
 
 
 TEST_IP = "172.17.69.106"
@@ -134,5 +155,5 @@ MEMCACHED_PORT = 11211
 
 if __name__ == "__main__":
     #send_memcached(TEST_IP, MEMCACHED_PORT)
-    send_dns(TEST_IP, DNS_PORT)
-    #send_ntp(TEST_IP, NTP_PORT)
+    #send_dns(TEST_IP, DNS_PORT)
+    send_ntp(TEST_IP, NTP_PORT)
