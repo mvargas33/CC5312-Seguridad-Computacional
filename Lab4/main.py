@@ -20,7 +20,7 @@ memcached_stats_settings = f'stats settings\r\n'
 
 # ==============================================================================
 # Memcached Set
-key = "a"
+key = "b"
 flag = 0
 exptime = 3600
 text = "a"*1430 # se cae con 1460
@@ -28,10 +28,18 @@ amount_of_bytes = len(text)
 memcached_set=f'set {key} {flag} {exptime} {amount_of_bytes}\n{text}\r\n'
 # ==============================================================================
 
+# ¿Se podrá optimizar?
+memcached_set_1=f'set hola {flag} {exptime} 4\nhola\r\n'
+memcached_set_2=f'set chao {flag} {exptime} 4\nchao\r\n'
+memcached_get_2=f'get hola chao\r\n'
+# Lamentablemente tenemos largo máximo
+
+
 # ==============================================================================
 # Memcached Get
 key = "a"
 memcached_get=f'get {key}\r\n'
+memcached_double_get=f'get {key} {key}\r\n'
 # ==============================================================================
 
 # Memcached Set (corrected)
@@ -66,6 +74,7 @@ def send_memcached(ip, port):
     sys.stdout = save_stdout
     
     print(f'RECEIVED LEN :{len(capture.getvalue())}\n')
+    print(capture.getvalue())
     #print(capture.getvalue())
 
     # Get cofficient...
