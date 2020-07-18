@@ -20,7 +20,7 @@ memcached_stats_settings = f'stats settings\r\n'
 
 # ==============================================================================
 # Memcached Set
-key = "a"
+key = "b"
 flag = 0
 exptime = 3600
 text = "a"*1430 # se cae con 1460
@@ -28,10 +28,18 @@ amount_of_bytes = len(text)
 memcached_set=f'set {key} {flag} {exptime} {amount_of_bytes}\n{text}\r\n'
 # ==============================================================================
 
+# ¿Se podrá optimizar?
+memcached_set_1=f'set hola {flag} {exptime} 4\nhola\r\n'
+memcached_set_2=f'set chao {flag} {exptime} 4\nchao\r\n'
+memcached_get_2=f'get hola chao\r\n'
+# Lamentablemente tenemos largo máximo
+
+
 # ==============================================================================
 # Memcached Get
 key = "a"
 memcached_get=f'get {key}\r\n'
+memcached_double_get=f'get {key} {key}\r\n'
 # ==============================================================================
 
 # Memcached Set (corrected)
@@ -66,6 +74,7 @@ def send_memcached(ip, port):
     sys.stdout = save_stdout
     
     print(f'RECEIVED LEN :{len(capture.getvalue())}\n')
+    print(capture.getvalue())
     #print(capture.getvalue())
 
     # Get cofficient...
@@ -78,12 +87,33 @@ def send_memcached(ip, port):
 def send_dns(ip, port):
     print(f"dns: {ip}:{port}")
     pkt = IP(dst=ip) / UDP(sport=54323, dport=port) / DNS(rd=1, id=12345,  qd=DNSQR(
-        qtype=1, qname="lab4.cc5312.xor.cl"))  # qtype=1 is A and DNS Request ID is 12345
+        qtype=16, qname="lab4.cc5312.xor.cl"))  # qtype=1 is A and DNS Request ID is 12345
+    
+    # Captura de lo enviado
+    capture_1 = StringIO()
+    save_stdout = sys.stdout
+    sys.stdout = capture_1
+    pkt.show()
+    sys.stdout = save_stdout
+    print("len enviado:" + str(len(capture_1.getvalue())))
+
     print(f"Sending: {pkt.summary()}")
     # ANS is like  IP(src=ip, dst=<myip>) / UDP(sport=port, dport=54323) / DNS(rd=1, qd=DNSQR(qtype=1, qname="lab4.cc5312.xor.cl") an=[<RRs received>]) # 1 is A
+    
     ans = sr1(pkt, verbose=1)
     print(f"received:")
+
+    # Captura de la respuesta
+    capture = StringIO()
+    save_stdout = sys.stdout
+    sys.stdout = capture
     ans.show()
+    sys.stdout = save_stdout 
+    print(f'RECEIVED LEN :{len(capture.getvalue())}\n')
+    
+    quotient = len(capture.getvalue())/len(capture_1.getvalue())
+    print(quotient)
+    #ans.show()
 
 
 def send_ntp(ip, port):
@@ -103,6 +133,6 @@ NTP_PORT = 123
 MEMCACHED_PORT = 11211
 
 if __name__ == "__main__":
-    send_memcached(TEST_IP, MEMCACHED_PORT)
-    #send_dns(TEST_IP, DNS_PORT)
+    #send_memcached(TEST_IP, MEMCACHED_PORT)
+    send_dns(TEST_IP, DNS_PORT)
     #send_ntp(TEST_IP, NTP_PORT)
