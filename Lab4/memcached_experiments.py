@@ -44,6 +44,7 @@ def send_memcached(ip, port, command):
     # Get cofficient...
     quotient = len(capture.getvalue())/len(capture_1.getvalue())
     print(quotient)
+    return quotient
 
     #ans.show()
 
@@ -65,6 +66,7 @@ def doit(*args):
 def main():
     text = 'a'*1400
     key = 'a'
+    max_i = 0
     for i in range(1440,1509):
         #print(i)
         print(i)
@@ -78,10 +80,13 @@ def main():
             print("the doc is ALAAIIV")
             print("i maximo")
             print(i)
+            max_i = i
             # Hasta la vista baaby
             p.terminate()
             p.join()
             break
-    print(i)
+    MESSAGE = f'get {key}\r\n'
+    q = send_memcached(TEST_IP, MEMCACHED_PORT, MESSAGE)
+    print(f'La eficiencia es: {q}, para un largo de string de {max_i} bytes')
 if __name__ == "__main__":
     main()
