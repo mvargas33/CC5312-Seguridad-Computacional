@@ -5,7 +5,7 @@ Instructions
 * Install tcpdump
 * Execute with `sudo` (some of this protocols require elevated privileges to send packages using restricted ports)
 
-# Memached
+# P1 Memached
 
 La estrategia a usar es simple: guardar un valor de tamaño máx en el servior, con una llave de tamaño mínimo (1 bytes). Luego hacer get del recurso y recibir una respuesta de largo mayor al get.
 
@@ -104,7 +104,7 @@ Pero como hemos concluirdo, la mayor respuesta que permite UDP es de 1400 bytes,
 
 La mejor eficiencia obtenida es aproximadamente 1400/7 = 200, dado que se guarda el par (key, value), donde key es de 1 byte y value de 1400, y luego se hace `get key\r\n`.
 
-## DNS
+# P1 DNS
 
 1) La utilidad original del servicio DNS es resolver la IP de un name server, puesto que, para los humanos es más sencillo recordar conjuntos de palabras que conjuntos numéricos. Luego este servicio, dado un name server, por ejemplo : ucursos.cl, devuelve su ip asociada al navegador para poder, finalmente, acceder al sitio web.
 
@@ -113,3 +113,26 @@ La mejor eficiencia obtenida es aproximadamente 1400/7 = 200, dado que se guarda
 3) Se propone para maximizar la eficiencia ocupar el total de RR's permitidas por el protocolo DNS, llenando el espacio designado del protocolo a estas respuestas, para así obtener una respuesta emitida por el servidor más grande de lo que se consulta. Para realizarlo se propone obtener un dominio que contenga varios subdominios para así enviar los RR's correspondientes a cada subdominio asociado al recorrido de la resolución enviada al servicio de DNS.
 
 4) Para maximizarla se debería eliminar las limitaciones de cortar una respuesta en la respuesta recibida por el DNS, puesto que, en un datagrama UDP, los paquetes son de tamaño fijo.
+
+# P1 NTP
+
+1) NTP se basa en el uso de UDP para enviar y recibir mensajes, donde no se valida la IP del enviador, por lo tanto se puede hacer spoofing de la IP, usando la IP de la víctima
+
+2) Luego existen dos comandos donde se envían pocos bytes de solicitud y se retornan muchos más de respuesta: `REQ_MON_GETLIST` y `REQ_MON_GETLIST_1`, por factores de 3660 y 5500 respectivamente (misma definición de eficiencia del enunciado). Otras fuentes indican factores entre 556-4670
+
+3) Monlist entrega hasta 100 datagramas UDP de 440 bytes de payload cada uno. La respuesta contiene las estadísticas de los clientes NTP: IP's de últimos clientes contactados (que hacen requests), NTP version y número de requests por cliente que contactaron al servidor.
+
+4) La forma de mejorar el ataque es maximizando la lista de clientes que se contactan con el servidor que presenta la vulnerabilidad (acepta monlist). Para ello:
+
+    a) Se debe encontrar un servidor que corra NTP con una versión anterior a la 4.2.7p26 y que no haya deshabilitado el comando.
+
+    b) Se necesita enmascarar las  600 - N IPs necesarias para llenar la lista de clientes contactados recientemente del servidor, donde N son las IPs ya existentes de clientes honestos que contactan al servidor.
+
+    Como UDP no valida el source de la IP, se podría variar manualmente la IP de los paquetes UDP para hacer requests al servidor NTP, siguiendo el protocolo en forma honesta pero invisible: NTP debe intercambiar timestamps, entonces por ejemplo, intentamos mandar un paquete estándar de primer request con IP source distinta a la nuestra, luego el servidor responde a esa IP (no vemos la respuesta), pero asumiendo que todo va bien, podemos mandar las requests que vienen en forma default con la IP cambiada. Asumiremos que después de un punto el servidor guarda la información de este cliente fantasma y lo incluirá en la respuesta de `monlist`.
+
+    c) Luego hacer `monlist` al servidor (que retornará una cantidad máx de clientes recientes) usando en los paquetes UDP la IP de la víctima.
+    
+    
+Fuente (KB CERT): https://www.kb.cert.org/vuls/id/348126
+Fuente (Christian Rossow): https://christian-rossow.de/publications/amplification-ndss2014.pdf
+
