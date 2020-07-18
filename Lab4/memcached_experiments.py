@@ -11,6 +11,10 @@ from scapy.all import *
 
 memcached_stats=f'stats\r\n'
 
+# En este código usted puede probar el largo óptimo
+# El máximo del recorrido for corresponde a uno de los campos descritos en stats
+# Finalmente usted recibe la eficiencia para el largo máximo permitido
+
 def send_memcached(ip, port, command):
     print(f"memcached: {ip}:{port}")
     pkt = IP(dst=ip) / UDP(sport=54321, dport=port) / \
