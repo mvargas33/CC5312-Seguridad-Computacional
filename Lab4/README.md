@@ -132,7 +132,9 @@ La mejor eficiencia obtenida es aproximadamente 1400/7 = 200, dado que se guarda
 
     c) Luego hacer `monlist` al servidor (que retornará una cantidad máx de clientes recientes) usando en los paquetes UDP la IP de la víctima.
     
-    
+5) En forma práctica, sólo mandamos el request `REQ_MON_GETLIST_1` al servicio que corría el servidor del lab, y nos retornó un mensaje tal que la eficiencia de amplificación fue de 4.05 aproximadamente.
+
+
 Fuente (KB CERT): https://www.kb.cert.org/vuls/id/348126
 Fuente (Christian Rossow): https://christian-rossow.de/publications/amplification-ndss2014.pdf
 
