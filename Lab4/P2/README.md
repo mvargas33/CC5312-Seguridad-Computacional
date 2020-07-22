@@ -20,6 +20,8 @@ Posteriormente, dado que se quiere recibir la información que envía el cliente
 
 La FLAG obtenida entre las `13:51:58.670729` y las `13:52:03.040490` del día 22 de Julio del año 2020 corresponde a :  `139949`.
 
+Observación: La máquina virtual decía `13:51:58.670729`, cuando en el reloj de Windows eran las `12:51:58`
+
 En el apartado de los anexos se muestra la obtención de la flag mediante un Screenshot.
 
 ### Respuestas a preguntas explícitas
