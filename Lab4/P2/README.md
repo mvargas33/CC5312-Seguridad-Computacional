@@ -38,7 +38,7 @@ En el apartado de los anexos se muestra la obtención de la flag mediante un Scr
 
 Inicialmente se importan las bibliotecas necesarias para generar paquetes, mediante la biblioteca `scapy`.
 
-![CODE A](anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/CodeABibliotecas.jpg)
+![CODE A](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/CodeABibliotecas.jpg)
 
 Ref : CODEABibliotecas
 
