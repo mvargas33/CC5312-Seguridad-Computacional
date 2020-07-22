@@ -32,23 +32,35 @@ En el apartado de los anexos se muestra la obtención de la flag mediante un Scr
 
 ### Explicación del Script de Python para realizar el DNS Spoofing:
 
-Inicialmente se importan las bibliotecas necesarias para generar paquetes, mediante la biblioteca `scapy`. Posteriomente se reutiliza la consulta DNS de la clase auxiliar, cambiando los campos del usuario que recibe la respuesta por nuestra dirección otorgada por la VPN.
+Inicialmente se importan las bibliotecas necesarias para generar paquetes, mediante la biblioteca `scapy`.
 
-![CODE A](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P2/CODE%20A.png)
+![CODE A](anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/CodeABibliotecas.jpg)
 
-Ref : CODE A
+Ref : CODEABibliotecas
+
+Además, se agregan como valores constantes al inicio del script nuestra IP y la IP de la víctima.
+
+![CODE B](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/CodeBTunneables.jpg)
+
+Ref : CodeBTunneables
+
+Posteriomente se reutiliza la consulta DNS de la clase auxiliar, cambiando los campos del usuario que recibe la respuesta por nuestra dirección otorgada por la VPN.
+
+![CODE C](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/CodeCAnsDNS.jpg)
+
+Ref : CodeCAnsDNS
 
 Con la información de la estructura del paquete, es posible generar un paquete para la IP que consulta con una IP maliciosa (la nuestra), para que el cliente o víctima se conecte a nuestro servidor.
 
-![CODE B](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P2/CODE%20A.png)
+![CODE D](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/CodeDpktgen.jpg)
 
-Ref : CODE B
+Ref : CODE D
 
 Dado que, existen 1024 números distintos de ID's para la consulta DNS, se prueba por cada uno de ellos, enviando 1024 paquetes con 1024 valores distintos
 
-![CODE C](http://anakena.dcc.uchile.cl/~patorres/Laboratorio3Seguridad/P2/CODE%20A.png)
+![CODE E](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/CodeEEnviar.jpg)
 
-Ref : CODE C
+Ref : CODE E
 
 ### Anexo
 
@@ -56,40 +68,42 @@ En esta sección se muestran los pasos utilizando imagenes para dar mayor clarid
 
 El Plan:
 
-![El Plan]()
+![El Plan](http://anakena.dcc.uchile.cl/anakena.jpg)
 
 Ref : 0 Import Scapy VM Fail
 
 No se realiza la importación de la biblioteca `scapy` en la máquina virtual:
 
-![Import Scapy VM Fail](http://anakena.dcc.uchile.cl/anakena.jpg)
+![Import Scapy VM Fail](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/0%20NotImporting.jpg)
 
-Ref : 0 Import Scapy VM Fail
+Ref : 0 NotImporting.jpg
 
 Correción del Problema de la importación:
 
-![Import Scapy Correction](http://anakena.dcc.uchile.cl/anakena.jpg)
+![Import Scapy Correction](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/1%20Correction.jpg)
 
-Ref : 1 Import Scapy Correction
+Ref : 1 Correction.jpg
 
 Conexión con la VPN:
 
-![VPN Connection](http://anakena.dcc.uchile.cl/anakena.jpg)
+![VPN Connection](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/2%20VPN.jpg)
+
+Ref : 2 VPN.jpg
 
 Servidor Corriendo:
 
-![Server Running](http://anakena.dcc.uchile.cl/anakena.jpg)
+![Server Running](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/3%20Server%20Running.jpg)
 
-Ref : Server Running
+Ref : 3 Server Running.jpg
 
 Envío de Paquetes visualizados en Wireshark:
 
-![Wireshark](http://anakena.dcc.uchile.cl/anakena.jpg)
+![Wireshark](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/4%20Wireshark.png)
 
-Ref : Wireshark
+Ref : 4 Wireshark.jp
 
 Valor de la Flag:
 
-![Flag Value](http://anakena.dcc.uchile.cl/anakena.jpg)
+![Flag Value](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/5%20We%20have%20the%20flag.jpg)
 
-Ref : We have the flag
+Ref : 5 We have the flag.jpg
