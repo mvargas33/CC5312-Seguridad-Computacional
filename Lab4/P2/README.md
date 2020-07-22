@@ -4,11 +4,13 @@
 
 Para correr código es necesario tener instalada la biblioteca `scapy` con el comando `pip install scapy`, en una máquina virtual utilizando Linux (fue probado en Lubuntu).
 
-Luego basta utilizar un visualizador de código como Visual Studio Code con la versión 3.8 de Python para correr el código con el botón play, o desde un terminal `python dns_spoofing.py`.
+Luego basta utilizar un visualizador de código como Visual Studio Code con la versión 3.8 de Python para correr el código con el botón play, o desde un terminal `sudo python3 dns_spoofing.py`.
 
 Notar que es necesario:
 
 Estar conectado/a a la VPN del CEC : `sudo openvpn --config CEC-fcfm.ovpn`
+
+Cambiar `malicious_ip` por la IP que entrega la VPN del CEC
 
 Levantar un servidor HTTP en el puerto 5312 : `while true; do printf 'HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nAccess-Control-Allow-Origin: *\r\n\r\n{"ok": true}' | netcat -l -w 1 5312; done`
 
