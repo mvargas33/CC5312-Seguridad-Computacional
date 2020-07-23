@@ -70,11 +70,11 @@ Ref : CODE E
 
 En esta sección se muestran los pasos utilizando imagenes para dar mayor claridad a cómo se realizó la experimentación en este apartado del Laboratorio:
 
-El Plan:
+El Plan consiste en ganarle al DNS, hacer que el sitio web entre a nuestro servidor y robárle el TOTP:
 
-![El Plan](http://anakena.dcc.uchile.cl/anakena.jpg)
+![El Plan](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/LAB4_PLAN_B.png)
 
-Ref : 0 Import Scapy VM Fail
+Ref : LAB4_PLAN_B.png
 
 No se realiza la importación de la biblioteca `scapy` en la máquina virtual:
 
