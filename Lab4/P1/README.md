@@ -5,7 +5,16 @@ Instructions
 * Install tcpdump
 * Execute with `sudo` (some of this protocols require elevated privileges to send packages using restricted ports)
 
+## Main
+En el archivo `main.py` para ejecutar cada uno de los ataques, basta comentar/descomentar las líneas dentro de la función `__main__` en las líneas 156-159.
+
 # P1 Memached
+
+## Memcached_experiment.py
+
+`Memchached experiment` prueba con distintos valores de string para almacenar en el caché, encontrando el máximo permitido mediante el uso de threads y finalmente entrega la eficiencia de amplificación.
+
+## Respuesta
 
 La estrategia a usar es simple: guardar un valor de tamaño máx en el servior, con una llave de tamaño mínimo (1 bytes). Luego hacer get del recurso y recibir una respuesta de largo mayor al get.
 
