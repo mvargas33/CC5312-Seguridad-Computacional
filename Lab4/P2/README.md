@@ -28,11 +28,39 @@ En el apartado de los anexos se muestra la obtención de la flag mediante un Scr
 
 ### Respuestas a preguntas explícitas
 
-#### TODO Explicar la factibilidad de un ataque de tipo DNS Spoofing si cada uno de estos problemas de implementación no existiera (manteniendo los otros problemas de implementación):
+#### Explicar la factibilidad de un ataque de tipo DNS Spoofing si cada uno de estos problemas de implementación no existiera (manteniendo los otros problemas de implementación):
 
 ##### Si el puerto de origen de la consulta DNS variase constantemente.
+Si el puerto del usuario cambia constantemente, este puede variar entre los valores 1 y 65536, y por cada uno de estos valores, habría que probar todos los ID de request DNS que son 1024 (por enunciado). Entonces el espacio de posibilidades aumenta en 65535x, lo cual hace más infactible el ataque, pero no tan imposible aún:
+
+- Por el ataque de cumpleaños, si el usuario cambia el puerto en forma equibrobale, entonces después de 1.2*sqrt(65536) cambios, es altamente probable, que repita un puerto, esto es después de 307.2 intentos. Y si cambia el puerto cada 10 ms, luego de 3 segundos se repite el puerto con alta probabilidad. Por lo tanto se podría atacar a un puerto fijo realizando el ataque constantemente, esperándo que el usuario repita el puerto en algún momento y se finalice el ataque.
+
+  La probabilidad de éxito (en función del tiempo) depende directamente de la frecuencia en que el usuario cambia el puerto
+
+  Fuente: https://es.wikipedia.org/wiki/Ataque_de_cumplea%C3%B1os
+
+- El ataque puede hacerse de todas formas con máquinas en paralelo, donde cada una apunte a los 65536 puertos distintos, o bien, que cada una abarque un rango depuertos. Luego realizar el ataque variando el ID de TX. Esto puede hacerse contratando una botnet por ejemplo ($10 USD por hora).
+
+
 ##### Si el ID de request pudiese tomar cualquier valor.
+El ID tiene 16 bits en el paquete, por que puede tomar 65536 valores dintintos, si el puerto a atacar es fijo, entonces la probabilidad de éxito por intento disminuye, pero el ataque sigue siendo factible, porque si bien, antes se probaban 1024 valores, y en aprox. 10 seg se obtenía la flag, ahora ese tiempo será mayor, pero se obtendrá la flag eventualmente.
+
+Lo único que cambia es el espacio de valores a probar que ahora es mayor.
+
+
 ##### Si el cliente no esperara paquetes de cualquier IP de origen.
+El protocolo IPv4 aguanta 2^32 valores distintos, IPv6 2^128. Por lo tanto, sin saber qué rango de IPs acepta el usuario (y asumiendo que ningún router bloqueará los paquetes con IPs extrañas) es muy infacible completar el ataque sólo provando valores IP distintos, y para cada uno 1024 valores distintos.
+
+Además, en la realidad, si tenemos el rango de IPs que acepta el usuario, deberíamos de alguna forma tener acceso a alguna máquina destro de ese rango, para que la IP de origen no se vea como maliciosa por los routers/firewalls y no se bloqueen los paquetes. Y esto ya es infactible, ya que asociar IP a georeferenciasción parece ser un problema disfuso (por lo dicho en clases) como para saber siquiera dónde atacar para conseguir acceso a una máquina con esos valores IP.
+
+##### Comparación de espacios de búsqueda
+
+Se puede ver del siguiente gráfico que el espacio de C (restricción de IP) es exponencialmente mayor al del caso A (Puerto cambiante), y este mayor al caso B(Valores posibles de TX ID). Además la curva que ajusta el gráfico es exponencial, por lo que la probabilidad de hacer cada ataque disminuye exponencialmente también, y se hacen menos factibles.
+
+![GRAFICO](http://anakena.dcc.uchile.cl/~patorres/Laboratorio4Seguridad/EspacioDeBusqueda.png)
+Ref : EspacioDeBusqueda
+
+La infactibilidad puede medirse en tiempo usando el ataque de cumpleaños para cualquier espacio de búsqueda, y con eso darse cuenta de la factibilidad de cada cada caso.
 
 ### Explicación del Script de Python para realizar el DNS Spoofing:
 
